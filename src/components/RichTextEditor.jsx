@@ -7,12 +7,14 @@ import { FontFamily } from '@tiptap/extension-font-family'
 import { Underline } from '@tiptap/extension-underline'
 import { Link } from '@tiptap/extension-link'
 import { Image } from '@tiptap/extension-image'
+import { CodeBlock } from '@tiptap/extension-code-block'
 import {
   Bold,
   Italic,
   Underline as UnderlineIcon,
   Strikethrough,
   Code,
+  Code2,
   Heading1,
   Heading2,
   Heading3,
@@ -39,7 +41,9 @@ const RichTextEditor = ({ content, onChange }) => {
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        codeBlock: false, // Disable default codeBlock to use our custom one
+      }),
       TextStyle,
       Color,
       TextAlign.configure({
@@ -51,6 +55,11 @@ const RichTextEditor = ({ content, onChange }) => {
         openOnClick: false,
       }),
       Image,
+      CodeBlock.configure({
+        HTMLAttributes: {
+          class: 'bg-gray-100 p-4 rounded-md font-mono text-sm',
+        },
+      }),
     ],
     content: content,
     onUpdate: ({ editor }) => {
@@ -58,7 +67,7 @@ const RichTextEditor = ({ content, onChange }) => {
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[300px] p-4',
+        class: 'prose prose-lg max-w-none focus:outline-none min-h-[300px] p-4',
       },
     },
   })
@@ -132,8 +141,18 @@ const RichTextEditor = ({ content, onChange }) => {
               size="sm"
               onClick={() => editor.chain().focus().toggleCode().run()}
               className="h-8 w-8 p-0"
+              title="Inline Code"
             >
               <Code className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={editor.isActive('codeBlock') ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+              className="h-8 w-8 p-0"
+              title="Code Block"
+            >
+              <Code2 className="h-4 w-4" />
             </Button>
           </div>
 
