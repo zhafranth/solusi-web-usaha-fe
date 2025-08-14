@@ -3,7 +3,24 @@ import { ArrowRight, CheckCircle } from "lucide-react"
 
 const Hero = () => {
   return (
-    <section id="home" className="bg-gradient-to-br from-primary-blue to-primary-blue/90 text-white py-20 lg:py-32">
+    <section 
+      id="home" 
+      className="relative text-white py-20 lg:py-32 overflow-hidden"
+      style={{
+        backgroundImage: 'url(https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      {/* Diagonal gradient overlay */}
+       <div className="absolute inset-0" 
+            style={{
+              background: 'linear-gradient(135deg, #235EE0 0%, rgba(35, 94, 224, 0.95) 50%, rgba(35, 94, 224, 0.85) 100%)'
+            }}></div>
+      
+      {/* Content wrapper */}
+      <div className="relative z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
@@ -99,6 +116,7 @@ const Hero = () => {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </section>
   )
