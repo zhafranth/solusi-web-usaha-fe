@@ -1,18 +1,28 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Eye, EyeOff, Lock, Mail, Shield } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useLogin } from '../services/authService'
+import { useAuth } from '../hooks/useAuth'
 
 const AuthPage = () => {
   const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
+  const loginMutation = useLogin()
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   })
   const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState({})
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard', { replace: true })
+    }
+  }, [isAuthenticated, navigate])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -54,19 +64,16 @@ const AuthPage = () => {
       return
     }
     
-    setIsLoading(true)
-    
-    setTimeout(() => {
-      // Simulasi login berhasil
-      // Simpan token ke localStorage
-      localStorage.setItem('authToken', 'demo-auth-token-' + Date.now())
-      localStorage.setItem('userEmail', formData.email)
-      
-      setIsLoading(false)
-      
-      // Redirect ke dashboard
-      navigate('/dashboard')
-    }, 1500)
+    loginMutation.mutate(formData, {
+      onSuccess: () => {
+        navigate('/dashboard')
+      },
+      onError: (error) => {
+        setErrors({
+          general: error?.response?.data?.message || 'Login gagal. Silakan coba lagi.'
+        })
+      }
+    })
   }
 
   const togglePasswordVisibility = () => {
@@ -168,6 +175,12 @@ const AuthPage = () => {
                 )}
               </div>
 
+              {errors.general && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-600 font-body">{errors.general}</p>
+                </div>
+              )}
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <input
@@ -190,10 +203,10 @@ const AuthPage = () => {
 
               <Button
                 type="submit"
-                disabled={isLoading}
+                disabled={loginMutation.isPending}
                 className="w-full bg-gradient-to-r from-primary-blue to-primary-green hover:from-primary-blue/90 hover:to-primary-green/90 text-white font-body py-3 text-base transition-all duration-200 transform hover:scale-[1.02]"
               >
-                {isLoading ? (
+                {loginMutation.isPending ? (
                   <div className="flex items-center justify-center">
                     <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

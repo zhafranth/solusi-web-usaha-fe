@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
 import { 
   LayoutDashboard, 
   FileText, 
@@ -22,6 +23,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { blogPosts } from '../data/blogPosts'
 
 const DashboardPage = () => {
+  const { logout } = useAuth()
+  const navigate = useNavigate()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [activeMenu, setActiveMenu] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
@@ -46,10 +49,8 @@ const DashboardPage = () => {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken')
-    localStorage.removeItem('userEmail')
-    alert('Logout berhasil!')
-    window.location.href = '/auth'
+    logout()
+    navigate('/auth', { replace: true })
   }
 
   // Filter dan search blog posts

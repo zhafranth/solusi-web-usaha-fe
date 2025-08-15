@@ -1,12 +1,18 @@
 import { Button } from "./ui/button"
-import { Menu, X } from "lucide-react"
+import { Menu, X, User, LogOut } from "lucide-react"
 import { useState } from "react"
 import { Link, useLocation } from "react-router-dom"
 import ScrollProgressBar from "./ScrollProgressBar"
+import { useAuth } from "../hooks/useAuth"
+import { useLogout } from "../services/authService"
+import LoginForm from "./LoginForm"
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [showLoginForm, setShowLoginForm] = useState(false)
   const location = useLocation()
+  const { isAuthenticated, user } = useAuth()
+  const logoutMutation = useLogout()
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
@@ -21,6 +27,18 @@ const Header = () => {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' })
     }
+  }
+
+  const handleLogout = () => {
+    logoutMutation.mutate()
+  }
+
+  const handleLoginClick = () => {
+    setShowLoginForm(true)
+  }
+
+  const handleCloseLogin = () => {
+    setShowLoginForm(false)
   }
 
   return (
@@ -55,10 +73,33 @@ const Header = () => {
           </nav>
 
           {/* CTA Button */}
-          <div className="hidden md:flex">
-            <Button onClick={() => scrollToSection('contact')} className="bg-primary-green hover:bg-primary-green/90 text-white font-body">
-              Konsultasi Gratis
-            </Button>
+          <div className="hidden md:flex items-center space-x-4">
+            {isAuthenticated ? (
+              <div className="flex items-center space-x-4">
+                <Link to="/dashboard" className="flex items-center space-x-2 text-gray-700 hover:text-primary-blue transition-colors">
+                  <User size={20} />
+                  <span className="font-body">{user?.name || 'Dashboard'}</span>
+                </Link>
+                <Button 
+                  onClick={handleLogout}
+                  variant="outline"
+                  className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white font-body"
+                  disabled={logoutMutation.isPending}
+                >
+                  <LogOut size={16} className="mr-2" />
+                  {logoutMutation.isPending ? 'Logging out...' : 'Logout'}
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <Button onClick={handleLoginClick} variant="outline" className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white font-body">
+                  Login
+                </Button>
+                <Button onClick={() => scrollToSection('contact')} className="bg-primary-green hover:bg-primary-green/90 text-white font-body">
+                  Konsultasi Gratis
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -91,10 +132,33 @@ const Header = () => {
               <button onClick={() => { scrollToSection('contact'); setIsMenuOpen(false); }} className="block w-full text-left px-3 py-2 text-gray-700 hover:text-primary-blue transition-colors font-body">
                 Kontak
               </button>
-              <div className="px-3 py-2">
-                <Button onClick={() => { scrollToSection('contact'); setIsMenuOpen(false); }} className="w-full bg-primary-green hover:bg-primary-green/90 text-white font-body">
-                  Konsultasi Gratis
-                </Button>
+              <div className="px-3 py-2 space-y-2">
+                {isAuthenticated ? (
+                  <>
+                    <Link to="/dashboard" onClick={() => setIsMenuOpen(false)} className="flex items-center space-x-2 px-3 py-2 text-gray-700 hover:text-primary-blue transition-colors font-body">
+                      <User size={20} />
+                      <span>{user?.name || 'Dashboard'}</span>
+                    </Link>
+                    <Button 
+                      onClick={() => { handleLogout(); setIsMenuOpen(false); }}
+                      variant="outline"
+                      className="w-full border-red-500 text-red-500 hover:bg-red-500 hover:text-white font-body"
+                      disabled={logoutMutation.isPending}
+                    >
+                      <LogOut size={16} className="mr-2" />
+                      {logoutMutation.isPending ? 'Logging out...' : 'Logout'}
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button onClick={() => { handleLoginClick(); setIsMenuOpen(false); }} variant="outline" className="w-full border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white font-body">
+                      Login
+                    </Button>
+                    <Button onClick={() => { scrollToSection('contact'); setIsMenuOpen(false); }} className="w-full bg-primary-green hover:bg-primary-green/90 text-white font-body">
+                      Konsultasi Gratis
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -102,6 +166,11 @@ const Header = () => {
       </div>
     </header>
      <ScrollProgressBar />
+     
+     {/* Login Form Modal */}
+     {showLoginForm && (
+       <LoginForm onClose={handleCloseLogin} />
+     )}
      </>
   )
 }
