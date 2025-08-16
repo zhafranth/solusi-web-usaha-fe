@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react'
+import { useForm, Controller } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
+import * as yup from 'yup'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Eye, EyeOff, Lock, Mail, Shield } from 'lucide-react'
@@ -6,16 +9,37 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useLogin } from '../services/authService'
 import { useAuth } from '../hooks/useAuth'
 
+// Validation schema
+const schema = yup.object().shape({
+  email: yup
+    .string()
+    .required('Email wajib diisi')
+    .email('Format email tidak valid'),
+  password: yup
+    .string()
+    .required('Password wajib diisi')
+    .min(6, 'Password minimal 6 karakter'),
+})
+
 const AuthPage = () => {
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
   const loginMutation = useLogin()
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  })
   const [showPassword, setShowPassword] = useState(false)
-  const [errors, setErrors] = useState({})
+  
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    setError,
+  } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      email: '',
+      password: ''
+    },
+    mode: 'onChange',
+  })
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -24,53 +48,15 @@ const AuthPage = () => {
     }
   }, [isAuthenticated, navigate])
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }))
-    }
-  }
-
-  const validateForm = () => {
-    const newErrors = {}
-    
-    if (!formData.email) {
-      newErrors.email = 'Email wajib diisi'
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Format email tidak valid'
-    }
-    
-    if (!formData.password) {
-      newErrors.password = 'Password wajib diisi'
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password minimal 6 karakter'
-    }
-    
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    
-    if (!validateForm()) {
-      return
-    }
-    
-    loginMutation.mutate(formData, {
+  const onSubmit = async (data) => {
+    loginMutation.mutate(data, {
       onSuccess: () => {
         navigate('/dashboard')
       },
       onError: (error) => {
-        setErrors({
-          general: error?.response?.data?.message || 'Login gagal. Silakan coba lagi.'
+        setError('root', {
+          type: 'manual',
+          message: error?.response?.data?.message || 'Login gagal. Silakan coba lagi.'
         })
       }
     })
@@ -99,85 +85,98 @@ const AuthPage = () => {
           </Link>
         </div>
 
-        <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
-          <CardHeader className="text-center pb-6">
-            <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-primary-blue to-primary-green rounded-full flex items-center justify-center">
-              <Shield className="w-8 h-8 text-white" />
+        <Card className="backdrop-blur-sm bg-white/95 shadow-2xl border-0">
+          <CardHeader className="space-y-1 pb-6">
+            <div className="flex items-center justify-center mb-4">
+              <div className="p-3 bg-primary-blue/10 rounded-full">
+                <Shield className="h-8 w-8 text-primary-blue" />
+              </div>
             </div>
-            <CardTitle className="text-2xl font-heading font-bold text-gray-900">
-              Admin Login
+            <CardTitle className="text-2xl font-bold text-center text-gray-900 font-heading">
+              Masuk ke Dashboard
             </CardTitle>
-            <CardDescription className="text-gray-600 font-body">
-              Masuk ke panel admin SolusiWeb Usaha
+            <CardDescription className="text-center text-gray-600 font-body">
+              Kelola website dan konten Anda dengan mudah
             </CardDescription>
           </CardHeader>
-          
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium text-gray-700 font-body">
                   Email Address
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent font-body transition-colors ${
-                      errors.email ? 'border-red-500 bg-red-50' : 'border-gray-300 bg-white'
-                    }`}
-                    placeholder="admin@solusiweb.com"
-                  />
-                </div>
-                {errors.email && (
-                  <p className="text-sm text-red-600 font-body">{errors.email}</p>
-                )}
+                <Controller
+                  name="email"
+                  control={control}
+                  render={({ field }) => (
+                    <div>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <Mail className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          {...field}
+                          id="email"
+                          type="email"
+                          className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent font-body transition-colors ${
+                            errors.email ? 'border-red-500 bg-red-50' : 'border-gray-300 bg-white'
+                          }`}
+                          placeholder="admin@solusiweb.com"
+                        />
+                      </div>
+                      {errors.email && (
+                        <p className="text-sm text-red-600 font-body">{errors.email.message}</p>
+                      )}
+                    </div>
+                  )}
+                />
               </div>
 
               <div className="space-y-2">
                 <label htmlFor="password" className="text-sm font-medium text-gray-700 font-body">
                   Password
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent font-body transition-colors ${
-                      errors.password ? 'border-red-500 bg-red-50' : 'border-gray-300 bg-white'
-                    }`}
-                    placeholder="Masukkan password"
-                  />
-                  <button
-                    type="button"
-                    onClick={togglePasswordVisibility}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-5 w-5" />
-                    ) : (
-                      <Eye className="h-5 w-5" />
-                    )}
-                  </button>
-                </div>
-                {errors.password && (
-                  <p className="text-sm text-red-600 font-body">{errors.password}</p>
-                )}
+                <Controller
+                  name="password"
+                  control={control}
+                  render={({ field }) => (
+                    <div>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <Lock className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          {...field}
+                          id="password"
+                          type={showPassword ? 'text' : 'password'}
+                          className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent font-body transition-colors ${
+                            errors.password ? 'border-red-500 bg-red-50' : 'border-gray-300 bg-white'
+                          }`}
+                          placeholder="Masukkan password"
+                        />
+                        <button
+                          type="button"
+                          onClick={togglePasswordVisibility}
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-5 w-5" />
+                          ) : (
+                            <Eye className="h-5 w-5" />
+                          )}
+                        </button>
+                      </div>
+                      {errors.password && (
+                        <p className="text-sm text-red-600 font-body">{errors.password.message}</p>
+                      )}
+                    </div>
+                  )}
+                />
               </div>
 
-              {errors.general && (
+              {errors.root && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-sm text-red-600 font-body">{errors.general}</p>
+                  <p className="text-sm text-red-600 font-body">{errors.root.message}</p>
                 </div>
               )}
 
@@ -204,35 +203,36 @@ const AuthPage = () => {
               <Button
                 type="submit"
                 disabled={loginMutation.isPending}
-                className="w-full bg-gradient-to-r from-primary-blue to-primary-green hover:from-primary-blue/90 hover:to-primary-green/90 text-white font-body py-3 text-base transition-all duration-200 transform hover:scale-[1.02]"
+                className="w-full bg-primary-blue hover:bg-primary-blue/90 text-white py-3 rounded-lg font-medium font-body transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loginMutation.isPending ? (
                   <div className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
                     Memproses...
                   </div>
                 ) : (
-                  'Masuk ke Admin Panel'
+                  'Masuk ke Dashboard'
                 )}
               </Button>
             </form>
 
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <h4 className="text-sm font-medium text-blue-800 font-body mb-2">Demo Credentials:</h4>
-              <div className="text-xs text-blue-700 font-body space-y-1">
-                <p><strong>Email:</strong> admin@solusiweb.com</p>
-                <p><strong>Password:</strong> admin123</p>
-              </div>
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-600 font-body">
+                Belum punya akses?{' '}
+                <Link 
+                  to="/contact" 
+                  className="text-primary-blue hover:text-primary-blue/80 font-medium transition-colors"
+                >
+                  Hubungi Admin
+                </Link>
+              </p>
             </div>
           </CardContent>
         </Card>
 
         <div className="mt-6 text-center">
-          <p className="text-white/60 text-sm font-body">
-            © 2024 SolusiWeb Usaha. All rights reserved.
+          <p className="text-white/70 text-xs font-body">
+            © 2024 Solusi Web Usaha. Semua hak dilindungi.
           </p>
         </div>
       </div>

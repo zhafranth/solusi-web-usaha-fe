@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import { ArrowLeft, Save, Eye, Upload, X } from "lucide-react";
 import { Button } from "../components/ui/button";
 import {
@@ -14,6 +17,17 @@ import { uploadFeaturedImage } from "../services/uploadService";
 import { useCategories } from "../services/categoryService";
 import { saveDraft, publishBlog } from "../services/blogService";
 
+// Validation schema
+const schema = yup.object().shape({
+  title: yup.string().required("Judul wajib diisi").min(5, "Judul minimal 5 karakter"),
+  excerpt: yup.string().required("Excerpt wajib diisi").min(10, "Excerpt minimal 10 karakter"),
+  content: yup.string().required("Konten wajib diisi").min(50, "Konten minimal 50 karakter"),
+  category: yup.string().required("Kategori wajib dipilih"),
+  tags: yup.string().optional(),
+  featured: yup.boolean().default(false),
+  image: yup.string().required("Gambar utama wajib diupload"),
+});
+
 const AddPostPage = () => {
   const navigate = useNavigate();
   const {
@@ -22,32 +36,33 @@ const AddPostPage = () => {
     error: categoriesError,
   } = useCategories();
 
-  const [formData, setFormData] = useState({
-    title: "",
-    excerpt: "",
-    content: "",
-    category: "",
-    tags: "",
-    featured: false,
-    image: "",
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      title: "",
+      excerpt: "",
+      content: "",
+      category: "",
+      tags: "",
+      featured: false,
+      image: "",
+    },
+    mode: "onChange",
   });
+
+  const watchedValues = watch();
   const [isPreview, setIsPreview] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
-
   const handleContentChange = (content) => {
-    setFormData((prev) => ({
-      ...prev,
-      content,
-    }));
+    setValue("content", content, { shouldValidate: true });
   };
 
   const handleImageUpload = async (e) => {
@@ -58,10 +73,7 @@ const AddPostPage = () => {
     try {
       const result = await uploadFeaturedImage(file);
       console.log("result:", result);
-      setFormData((prev) => ({
-        ...prev,
-        image: result.url,
-      }));
+      setValue("image", result.url, { shouldValidate: true });
     } catch (error) {
       alert(`Error upload gambar: ${error.message}`);
       console.error("Upload error:", error);
@@ -73,50 +85,22 @@ const AddPostPage = () => {
   };
 
   const removeImage = () => {
-    setFormData((prev) => ({
-      ...prev,
-      image: "",
-    }));
+    setValue("image", "", { shouldValidate: true });
   };
 
-  const handleSave = async (isDraft = false) => {
+  const onSubmit = async (data, isDraft = false) => {
     setIsSaving(true);
-
-    // Validasi form
-    if (!formData.title.trim()) {
-      alert("Judul post harus diisi!");
-      setIsSaving(false);
-      return;
-    }
-
-    if (!formData.excerpt.trim()) {
-      alert("Ringkasan/excerpt post harus diisi!");
-      setIsSaving(false);
-      return;
-    }
-
-    if (!formData.content.trim()) {
-      alert("Konten post harus diisi!");
-      setIsSaving(false);
-      return;
-    }
-
-    if (!formData.category) {
-      alert("Kategori harus dipilih!");
-      setIsSaving(false);
-      return;
-    }
 
     try {
       // Prepare data untuk API
       const blogData = {
-        title: formData.title.trim(),
-        excerpt: formData.excerpt.trim(),
-        content: formData.content.trim(),
-        categoryId: parseInt(formData.category), // Convert ke integer
-        featuredImage: formData.image || undefined,
-        tags: formData.tags
-          ? formData.tags
+        title: data.title.trim(),
+        excerpt: data.excerpt.trim(),
+        content: data.content.trim(),
+        categoryId: parseInt(data.category), // Convert ke integer
+        featuredImage: data.image || undefined,
+        tags: data.tags
+          ? data.tags
               .split(",")
               .map((tag) => tag.trim())
               .filter((tag) => tag)
@@ -146,6 +130,9 @@ const AddPostPage = () => {
     }
   };
 
+  const handleSaveDraft = handleSubmit((data) => onSubmit(data, true));
+  const handlePublish = handleSubmit((data) => onSubmit(data, false));
+
   const renderPreview = () => {
     return (
       <div className="max-w-4xl mx-auto">
@@ -162,22 +149,22 @@ const AddPostPage = () => {
               </Button>
             </div>
 
-            {formData.image && (
+            {watchedValues.image && (
               <div className="mb-6">
                 <img
-                  src={formData.image}
-                  alt={formData.title}
+                  src={watchedValues.image}
+                  alt={watchedValues.title}
                   className="w-full h-64 object-cover rounded-lg"
                 />
               </div>
             )}
 
             <CardTitle className="text-3xl font-bold mb-2">
-              {formData.title || "Judul Post"}
+              {watchedValues.title || "Judul Post"}
             </CardTitle>
 
             <CardDescription className="text-lg text-gray-600 mb-4">
-              {formData.excerpt || "Excerpt akan muncul di sini..."}
+              {watchedValues.excerpt || "Excerpt akan muncul di sini..."}
             </CardDescription>
 
             <div className="flex items-center gap-4 text-sm text-gray-500 mb-6">
@@ -185,12 +172,12 @@ const AddPostPage = () => {
               <span>•</span>
               <span>{new Date().toLocaleDateString("id-ID")}</span>
               <span>•</span>
-              <span>{Math.ceil(formData.content.length / 1000)} min read</span>
-              {formData.category && (
+              <span>{Math.ceil(watchedValues.content.length / 1000)} min read</span>
+              {watchedValues.category && (
                 <>
                   <span>•</span>
                   <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                    {formData.category}
+                    {watchedValues.category}
                   </span>
                 </>
               )}
@@ -202,17 +189,17 @@ const AddPostPage = () => {
               className="prose prose-lg max-w-none"
               dangerouslySetInnerHTML={{
                 __html:
-                  formData.content || "<p>Konten akan muncul di sini...</p>",
+                  watchedValues.content || "<p>Konten akan muncul di sini...</p>",
               }}
             />
 
-            {formData.tags && (
+            {watchedValues.tags && (
               <div className="mt-8 pt-6 border-t border-gray-200">
                 <h4 className="text-sm font-semibold text-gray-700 mb-2">
                   Tags:
                 </h4>
                 <div className="flex flex-wrap gap-2">
-                  {formData.tags.split(",").map((tag, index) => (
+                  {watchedValues.tags.split(",").map((tag, index) => (
                     <span
                       key={index}
                       className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm"
@@ -268,7 +255,7 @@ const AddPostPage = () => {
               </Button>
               <Button
                 variant="outline"
-                onClick={() => handleSave(true)}
+                onClick={handleSaveDraft}
                 disabled={isSaving}
                 className="flex items-center gap-2"
               >
@@ -276,7 +263,7 @@ const AddPostPage = () => {
                 Simpan Draft
               </Button>
               <Button
-                onClick={() => handleSave(false)}
+                onClick={handlePublish}
                 disabled={isSaving}
                 className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
               >
@@ -295,13 +282,28 @@ const AddPostPage = () => {
                   <CardTitle>Judul Post</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <input
-                    type="text"
+                  <Controller
                     name="title"
-                    value={formData.title}
-                    onChange={handleInputChange}
-                    placeholder="Masukkan judul post..."
-                    className="w-full p-3 text-xl font-semibold border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    control={control}
+                    render={({ field }) => (
+                      <div>
+                        <input
+                          {...field}
+                          type="text"
+                          placeholder="Masukkan judul post..."
+                          className={`w-full p-3 text-xl font-semibold border rounded-lg focus:outline-none focus:ring-2 ${
+                            errors.title
+                              ? "border-red-500 focus:ring-red-500"
+                              : "border-gray-300 focus:ring-blue-500"
+                          }`}
+                        />
+                        {errors.title && (
+                          <p className="mt-1 text-sm text-red-600">
+                            {errors.title.message}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   />
                 </CardContent>
               </Card>
@@ -315,13 +317,28 @@ const AddPostPage = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <textarea
+                  <Controller
                     name="excerpt"
-                    value={formData.excerpt}
-                    onChange={handleInputChange}
-                    placeholder="Masukkan excerpt..."
-                    rows={3}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    control={control}
+                    render={({ field }) => (
+                      <div>
+                        <textarea
+                          {...field}
+                          placeholder="Masukkan excerpt..."
+                          rows={3}
+                          className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 resize-none ${
+                            errors.excerpt
+                              ? "border-red-500 focus:ring-red-500"
+                              : "border-gray-300 focus:ring-blue-500"
+                          }`}
+                        />
+                        {errors.excerpt && (
+                          <p className="mt-1 text-sm text-red-600">
+                            {errors.excerpt.message}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   />
                 </CardContent>
               </Card>
@@ -332,10 +349,23 @@ const AddPostPage = () => {
                   <CardTitle>Konten</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <RichTextEditor
-                    content={formData.content}
-                    onChange={handleContentChange}
-                    placeholder="Mulai menulis konten post..."
+                  <Controller
+                    name="content"
+                    control={control}
+                    render={({ field }) => (
+                      <div>
+                        <RichTextEditor
+                          content={field.value}
+                          onChange={handleContentChange}
+                          placeholder="Mulai menulis konten post..."
+                        />
+                        {errors.content && (
+                          <p className="mt-1 text-sm text-red-600">
+                            {errors.content.message}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   />
                 </CardContent>
               </Card>
@@ -349,10 +379,10 @@ const AddPostPage = () => {
                   <CardTitle>Gambar Utama</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {formData.image ? (
+                  {watchedValues.image ? (
                     <div className="relative">
                       <img
-                        src={formData.image}
+                        src={watchedValues.image}
                         alt="Preview"
                         className="w-full h-32 object-cover rounded-lg"
                       />
@@ -373,8 +403,12 @@ const AddPostPage = () => {
                       </p>
                     </div>
                   ) : (
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                      <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                    <div className={`border-2 border-dashed rounded-lg p-6 text-center ${
+                      errors.image ? 'border-red-500' : 'border-gray-300'
+                    }`}>
+                      <Upload className={`w-8 h-8 mx-auto mb-2 ${
+                        errors.image ? 'text-red-400' : 'text-gray-400'
+                      }`} />
                       <p className="text-sm text-gray-600 mb-2">
                         Upload gambar utama
                       </p>
@@ -393,6 +427,11 @@ const AddPostPage = () => {
                         Pilih file
                       </label>
                     </div>
+                  )}
+                  {errors.image && (
+                    <p className="mt-2 text-sm text-red-600">
+                      {errors.image.message}
+                    </p>
                   )}
                 </CardContent>
               </Card>
@@ -421,22 +460,37 @@ const AddPostPage = () => {
                       </Button>
                     </div>
                   ) : (
-                    <select
+                    <Controller
                       name="category"
-                      value={formData.category}
-                      onChange={handleInputChange}
-                      className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Pilih kategori</option>
-                      {categories?.map((category) => (
-                        <option
-                          key={category.id || category}
-                          value={category.id || category}
-                        >
-                          {category.name || category}
-                        </option>
-                      ))}
-                    </select>
+                      control={control}
+                      render={({ field }) => (
+                        <div>
+                          <select
+                            {...field}
+                            className={`w-full p-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                              errors.category
+                                ? "border-red-500 focus:ring-red-500"
+                                : "border-gray-300 focus:ring-blue-500"
+                            }`}
+                          >
+                            <option value="">Pilih kategori</option>
+                            {categories?.map((category) => (
+                              <option
+                                key={category.id || category}
+                                value={category.id || category}
+                              >
+                                {category.name || category}
+                              </option>
+                            ))}
+                          </select>
+                          {errors.category && (
+                            <p className="mt-1 text-sm text-red-600">
+                              {errors.category.message}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    />
                   )}
                 </CardContent>
               </Card>
@@ -448,13 +502,17 @@ const AddPostPage = () => {
                   <CardDescription>Pisahkan dengan koma (,)</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <input
-                    type="text"
+                  <Controller
                     name="tags"
-                    value={formData.tags}
-                    onChange={handleInputChange}
-                    placeholder="react, javascript, tutorial"
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    control={control}
+                    render={({ field }) => (
+                      <input
+                        {...field}
+                        type="text"
+                        placeholder="react, javascript, tutorial"
+                        className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    )}
                   />
                 </CardContent>
               </Card>
@@ -465,16 +523,21 @@ const AddPostPage = () => {
                   <CardTitle>Pengaturan</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      name="featured"
-                      checked={formData.featured}
-                      onChange={handleInputChange}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm">Jadikan post unggulan</span>
-                  </label>
+                  <Controller
+                    name="featured"
+                    control={control}
+                    render={({ field }) => (
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          {...field}
+                          type="checkbox"
+                          checked={field.value}
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm">Jadikan post unggulan</span>
+                      </label>
+                    )}
+                  />
                 </CardContent>
               </Card>
             </div>
