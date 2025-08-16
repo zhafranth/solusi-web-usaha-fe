@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { 
@@ -16,11 +16,12 @@ import {
   Edit,
   Trash2,
   Calendar,
-  Clock
+  Clock,
+  Loader2
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
-import { blogPosts } from '../data/blogPosts'
+import { useBlogs } from '../services/blogService'
 
 const DashboardPage = () => {
   const { logout } = useAuth()
@@ -29,6 +30,20 @@ const DashboardPage = () => {
   const [activeMenu, setActiveMenu] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [currentPage, setCurrentPage] = useState(1)
+  
+  // Fetch blogs from API
+  const { 
+    data: blogsData, 
+    isLoading: isBlogsLoading, 
+    error: blogsError,
+    refetch: refetchBlogs
+  } = useBlogs({ 
+    page: currentPage, 
+    limit: 10,
+    search: searchQuery || undefined,
+    status: statusFilter !== 'all' ? statusFilter.toUpperCase() : undefined
+  })
 
   const menuItems = [
     {
@@ -53,78 +68,56 @@ const DashboardPage = () => {
     navigate('/auth', { replace: true })
   }
 
-  // Filter dan search blog posts
-  const filteredBlogPosts = useMemo(() => {
-    let filtered = blogPosts
-    
-    // Filter by search query
-    if (searchQuery) {
-      filtered = filtered.filter(post => 
-        post.title.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    }
-    
-    // Filter by status
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(post => {
-        if (statusFilter === 'published') return true // Semua post dianggap published untuk demo
-        if (statusFilter === 'draft') return false // Tidak ada draft untuk demo
-        if (statusFilter === 'featured') return post.featured
-        return true
-      })
-    }
-    
-    return filtered
-  }, [searchQuery, statusFilter])
+  // Get blogs data from API response
+  const blogs = blogsData?.data?.blogs || []
+  const pagination = blogsData?.data?.pagination || {}
+  
+  // Handle status filter change
+  const handleStatusFilterChange = (newStatus) => {
+    setStatusFilter(newStatus)
+    setCurrentPage(1) // Reset to first page when filtering
+  }
 
   const renderBlogList = () => {
     return (
       <div className="p-6">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Blog Posts Management</h1>
-          <p className="text-gray-600">Kelola semua artikel blog Anda</p>
-        </div>
-
-        {/* Search and Filter */}
-        <div className="bg-white rounded-lg shadow-sm border p-4 mb-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* Search */}
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Cari berdasarkan judul..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-            
-            {/* Status Filter */}
-            <div className="md:w-48">
-              <div className="relative">
-                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
-                >
-                  <option value="all">Semua Status</option>
-                  <option value="published">Published</option>
-                  <option value="featured">Featured</option>
-                </select>
-              </div>
-            </div>
-            
-            {/* Add New Button */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <h1 className="text-2xl font-bold text-gray-900">
+              Kelola Blog Posts
+            </h1>
             <Link to="/dashboard/add-post">
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Button className="bg-blue-600 hover:bg-blue-700">
                 <FileText className="w-4 h-4 mr-2" />
-                Tambah Post
+                Tambah Post Baru
               </Button>
             </Link>
+          </div>
+
+          {/* Search and Filter */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Cari blog post..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-gray-500" />
+              <select
+                value={statusFilter}
+                onChange={(e) => handleStatusFilterChange(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="all">Semua Status</option>
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -132,18 +125,41 @@ const DashboardPage = () => {
         <div className="bg-white rounded-lg shadow-sm border">
           <div className="p-4 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900">
-              Daftar Blog Posts ({filteredBlogPosts.length})
+              Daftar Blog Posts ({pagination.totalCount || 0})
             </h3>
           </div>
           
-          {filteredBlogPosts.length === 0 ? (
+          {/* Loading State */}
+          {isBlogsLoading && (
+            <div className="p-8 text-center">
+              <Loader2 className="w-8 h-8 text-blue-600 mx-auto mb-4 animate-spin" />
+              <p className="text-gray-500">Memuat blog posts...</p>
+            </div>
+          )}
+          
+          {/* Error State */}
+          {blogsError && (
+            <div className="p-8 text-center">
+              <FileText className="w-12 h-12 text-red-400 mx-auto mb-4" />
+              <p className="text-red-500 mb-4">Gagal memuat blog posts</p>
+              <Button onClick={() => refetchBlogs()} variant="outline">
+                Coba Lagi
+              </Button>
+            </div>
+          )}
+          
+          {/* Empty State */}
+          {!isBlogsLoading && !blogsError && blogs.length === 0 && (
             <div className="p-8 text-center">
               <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-500">Tidak ada blog post yang ditemukan</p>
             </div>
-          ) : (
+          )}
+          
+          {/* Blog Posts */}
+          {!isBlogsLoading && !blogsError && blogs.length > 0 && (
             <div className="divide-y divide-gray-200">
-              {filteredBlogPosts.map((post) => (
+              {blogs.map((post) => (
                 <div key={post.id} className="p-4 hover:bg-gray-50 transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -151,11 +167,13 @@ const DashboardPage = () => {
                         <h4 className="text-lg font-semibold text-gray-900 hover:text-blue-600 cursor-pointer">
                           {post.title}
                         </h4>
-                        {post.featured && (
-                          <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
-                            Featured
-                          </span>
-                        )}
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          post.status === 'PUBLISHED' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {post.status}
+                        </span>
                       </div>
                       
                       <p className="text-gray-600 text-sm mb-3 line-clamp-2">
@@ -165,19 +183,27 @@ const DashboardPage = () => {
                       <div className="flex items-center gap-4 text-sm text-gray-500">
                         <div className="flex items-center gap-1">
                           <User className="w-4 h-4" />
-                          <span>{post.author}</span>
+                          <span>{post.author?.nama || 'Unknown'}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <Calendar className="w-4 h-4" />
-                          <span>{new Date(post.publishedAt).toLocaleDateString('id-ID')}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          <span>{post.readTime}</span>
+                          <span>{new Date(post.createdAt).toLocaleDateString('id-ID')}</span>
                         </div>
                         <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                          {post.category}
+                          {post.category?.name || 'Uncategorized'}
                         </span>
+                        {post.tags && post.tags.length > 0 && (
+                          <div className="flex gap-1">
+                            {post.tags.slice(0, 2).map((tag, index) => (
+                              <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                                {tag}
+                              </span>
+                            ))}
+                            {post.tags.length > 2 && (
+                              <span className="text-xs text-gray-500">+{post.tags.length - 2}</span>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                     
@@ -195,6 +221,34 @@ const DashboardPage = () => {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+          
+          {/* Pagination */}
+          {!isBlogsLoading && !blogsError && pagination.totalPages > 1 && (
+            <div className="p-4 border-t border-gray-200 flex items-center justify-between">
+              <div className="text-sm text-gray-500">
+                Halaman {pagination.currentPage} dari {pagination.totalPages} 
+                ({pagination.totalCount} total blog posts)
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  disabled={!pagination.hasPrevPage}
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                >
+                  Previous
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  disabled={!pagination.hasNextPage}
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                >
+                  Next
+                </Button>
+              </div>
             </div>
           )}
         </div>
@@ -227,8 +281,8 @@ const DashboardPage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-blue-600 mb-2">12</div>
-              <p className="text-sm text-gray-600">+2 dari bulan lalu</p>
+              <div className="text-3xl font-bold text-blue-600 mb-2">{pagination.totalCount || 0}</div>
+              <p className="text-sm text-gray-600">Total blog posts</p>
             </CardContent>
           </Card>
 

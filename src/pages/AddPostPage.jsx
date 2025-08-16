@@ -1,110 +1,150 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Save, Eye, Upload, X } from 'lucide-react'
-import { Button } from '../components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
-import RichTextEditor from '../components/RichTextEditor'
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Save, Eye, Upload, X } from "lucide-react";
+import { Button } from "../components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import RichTextEditor from "../components/RichTextEditor";
+import { uploadFeaturedImage } from "../services/uploadService";
+import { useCategories } from "../services/categoryService";
+import { saveDraft, publishBlog } from "../services/blogService";
 
 const AddPostPage = () => {
-  const navigate = useNavigate()
-  const [formData, setFormData] = useState({
-    title: '',
-    excerpt: '',
-    content: '',
-    category: '',
-    tags: '',
-    featured: false,
-    image: ''
-  })
-  const [isPreview, setIsPreview] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
+  const navigate = useNavigate();
+  const {
+    data: categories = [],
+    isLoading: isCategoriesLoading,
+    error: categoriesError,
+  } = useCategories();
 
-  const categories = [
-    'Teknologi',
-    'Bisnis',
-    'Marketing',
-    'Design',
-    'Tutorial',
-    'Tips & Tricks',
-    'Berita',
-    'Lainnya'
-  ]
+  const [formData, setFormData] = useState({
+    title: "",
+    excerpt: "",
+    content: "",
+    category: "",
+    tags: "",
+    featured: false,
+    image: "",
+  });
+  const [isPreview, setIsPreview] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target
-    setFormData(prev => ({
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }))
-  }
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
 
   const handleContentChange = (content) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      content
-    }))
-  }
+      content,
+    }));
+  };
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      // Simulasi upload gambar - dalam implementasi nyata, upload ke server
-      const imageUrl = URL.createObjectURL(file)
-      setFormData(prev => ({
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setIsUploadingImage(true);
+    try {
+      const result = await uploadFeaturedImage(file);
+      console.log("result:", result);
+      setFormData((prev) => ({
         ...prev,
-        image: imageUrl
-      }))
+        image: result.url,
+      }));
+    } catch (error) {
+      alert(`Error upload gambar: ${error.message}`);
+      console.error("Upload error:", error);
+    } finally {
+      setIsUploadingImage(false);
+      // Reset input file
+      e.target.value = "";
     }
-  }
+  };
 
   const removeImage = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      image: ''
-    }))
-  }
+      image: "",
+    }));
+  };
 
   const handleSave = async (isDraft = false) => {
-    setIsSaving(true)
-    
+    setIsSaving(true);
+
     // Validasi form
     if (!formData.title.trim()) {
-      alert('Judul post harus diisi!')
-      setIsSaving(false)
-      return
+      alert("Judul post harus diisi!");
+      setIsSaving(false);
+      return;
     }
-    
+
+    if (!formData.excerpt.trim()) {
+      alert("Ringkasan/excerpt post harus diisi!");
+      setIsSaving(false);
+      return;
+    }
+
     if (!formData.content.trim()) {
-      alert('Konten post harus diisi!')
-      setIsSaving(false)
-      return
+      alert("Konten post harus diisi!");
+      setIsSaving(false);
+      return;
+    }
+
+    if (!formData.category) {
+      alert("Kategori harus dipilih!");
+      setIsSaving(false);
+      return;
     }
 
     try {
-      // Simulasi save ke server
-      const postData = {
-        ...formData,
-        id: Date.now(),
-        author: 'Admin User',
-        publishedAt: isDraft ? null : new Date().toISOString(),
-        status: isDraft ? 'draft' : 'published',
-        readTime: Math.ceil(formData.content.length / 1000) + ' min read',
-        tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+      // Prepare data untuk API
+      const blogData = {
+        title: formData.title.trim(),
+        excerpt: formData.excerpt.trim(),
+        content: formData.content.trim(),
+        categoryId: parseInt(formData.category), // Convert ke integer
+        featuredImage: formData.image || undefined,
+        tags: formData.tags
+          ? formData.tags
+              .split(",")
+              .map((tag) => tag.trim())
+              .filter((tag) => tag)
+          : undefined,
+      };
+
+      // Panggil API sesuai dengan status (draft atau published)
+      let response;
+      if (isDraft) {
+        response = await saveDraft(blogData);
+      } else {
+        response = await publishBlog(blogData);
       }
-      
-      // Simulasi delay
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      console.log('Post saved:', postData)
-      alert(`Post berhasil ${isDraft ? 'disimpan sebagai draft' : 'dipublikasikan'}!`)
-      navigate('/dashboard')
+
+      console.log("Post saved:", response);
+      alert(
+        `Post berhasil ${
+          isDraft ? "disimpan sebagai draft" : "dipublikasikan"
+        }!`
+      );
+      navigate("/dashboard");
     } catch (error) {
-      console.error('Error saving post:', error)
-      alert('Gagal menyimpan post. Silakan coba lagi.')
+      console.error("Error saving post:", error);
+      alert(error.message || "Gagal menyimpan post. Silakan coba lagi.");
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   const renderPreview = () => {
     return (
@@ -121,7 +161,7 @@ const AddPostPage = () => {
                 Kembali ke Editor
               </Button>
             </div>
-            
+
             {formData.image && (
               <div className="mb-6">
                 <img
@@ -131,19 +171,19 @@ const AddPostPage = () => {
                 />
               </div>
             )}
-            
+
             <CardTitle className="text-3xl font-bold mb-2">
-              {formData.title || 'Judul Post'}
+              {formData.title || "Judul Post"}
             </CardTitle>
-            
+
             <CardDescription className="text-lg text-gray-600 mb-4">
-              {formData.excerpt || 'Excerpt akan muncul di sini...'}
+              {formData.excerpt || "Excerpt akan muncul di sini..."}
             </CardDescription>
-            
+
             <div className="flex items-center gap-4 text-sm text-gray-500 mb-6">
               <span>By Admin User</span>
               <span>•</span>
-              <span>{new Date().toLocaleDateString('id-ID')}</span>
+              <span>{new Date().toLocaleDateString("id-ID")}</span>
               <span>•</span>
               <span>{Math.ceil(formData.content.length / 1000)} min read</span>
               {formData.category && (
@@ -156,18 +196,23 @@ const AddPostPage = () => {
               )}
             </div>
           </CardHeader>
-          
+
           <CardContent>
-            <div 
+            <div
               className="prose prose-lg max-w-none"
-              dangerouslySetInnerHTML={{ __html: formData.content || '<p>Konten akan muncul di sini...</p>' }}
+              dangerouslySetInnerHTML={{
+                __html:
+                  formData.content || "<p>Konten akan muncul di sini...</p>",
+              }}
             />
-            
+
             {formData.tags && (
               <div className="mt-8 pt-6 border-t border-gray-200">
-                <h4 className="text-sm font-semibold text-gray-700 mb-2">Tags:</h4>
+                <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                  Tags:
+                </h4>
                 <div className="flex flex-wrap gap-2">
-                  {formData.tags.split(',').map((tag, index) => (
+                  {formData.tags.split(",").map((tag, index) => (
                     <span
                       key={index}
                       className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm"
@@ -181,17 +226,15 @@ const AddPostPage = () => {
           </CardContent>
         </Card>
       </div>
-    )
-  }
+    );
+  };
 
   if (isPreview) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
-        <div className="container mx-auto px-4">
-          {renderPreview()}
-        </div>
+        <div className="container mx-auto px-4">{renderPreview()}</div>
       </div>
-    )
+    );
   }
 
   return (
@@ -203,15 +246,17 @@ const AddPostPage = () => {
             <div className="flex items-center gap-4">
               <Button
                 variant="outline"
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate("/dashboard")}
                 className="flex items-center gap-2"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Kembali
               </Button>
-              <h1 className="text-2xl font-bold text-gray-900">Tambah Post Baru</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Tambah Post Baru
+              </h1>
             </div>
-            
+
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
@@ -236,7 +281,7 @@ const AddPostPage = () => {
                 className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
               >
                 <Save className="w-4 h-4" />
-                {isSaving ? 'Menyimpan...' : 'Publikasikan'}
+                {isSaving ? "Menyimpan..." : "Publikasikan"}
               </Button>
             </div>
           </div>
@@ -320,16 +365,26 @@ const AddPostPage = () => {
                         <X className="h-3 w-3" />
                       </Button>
                     </div>
+                  ) : isUploadingImage ? (
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                      <p className="text-sm text-gray-600">
+                        Mengupload gambar...
+                      </p>
+                    </div>
                   ) : (
                     <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                       <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                      <p className="text-sm text-gray-600 mb-2">Upload gambar utama</p>
+                      <p className="text-sm text-gray-600 mb-2">
+                        Upload gambar utama
+                      </p>
                       <input
                         type="file"
                         accept="image/*"
                         onChange={handleImageUpload}
                         className="hidden"
                         id="image-upload"
+                        disabled={isUploadingImage}
                       />
                       <label
                         htmlFor="image-upload"
@@ -348,19 +403,41 @@ const AddPostPage = () => {
                   <CardTitle>Kategori</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <select
-                    name="category"
-                    value={formData.category}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Pilih kategori</option>
-                    {categories.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
-                  </select>
+                  {isCategoriesLoading ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+                      <p>Memuat kategori...</p>
+                    </div>
+                  ) : categoriesError ? (
+                    <div className="text-red-500">
+                      <p>Gagal memuat kategori. Silakan coba lagi nanti.</p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-2"
+                        onClick={() => window.location.reload()}
+                      >
+                        Coba lagi
+                      </Button>
+                    </div>
+                  ) : (
+                    <select
+                      name="category"
+                      value={formData.category}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Pilih kategori</option>
+                      {categories?.map((category) => (
+                        <option
+                          key={category.id || category}
+                          value={category.id || category}
+                        >
+                          {category.name || category}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </CardContent>
               </Card>
 
@@ -368,9 +445,7 @@ const AddPostPage = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Tags</CardTitle>
-                  <CardDescription>
-                    Pisahkan dengan koma (,)
-                  </CardDescription>
+                  <CardDescription>Pisahkan dengan koma (,)</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <input
@@ -407,7 +482,7 @@ const AddPostPage = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default AddPostPage
+export default AddPostPage;

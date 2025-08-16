@@ -29,15 +29,18 @@ import {
   AlignJustify,
   Link as LinkIcon,
   Image as ImageIcon,
-  Palette
+  Palette,
+  Loader2
 } from 'lucide-react'
 import { Button } from './ui/button'
 import { useState } from 'react'
+import { uploadContentImage } from '../services/uploadService'
 
 const RichTextEditor = ({ content, onChange }) => {
   const [showColorPicker, setShowColorPicker] = useState(false)
   const [showLinkDialog, setShowLinkDialog] = useState(false)
   const [linkUrl, setLinkUrl] = useState('')
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
 
   const editor = useEditor({
     extensions: [
@@ -85,10 +88,26 @@ const RichTextEditor = ({ content, onChange }) => {
   }
 
   const addImage = () => {
-    const url = window.prompt('URL Gambar:')
-    if (url) {
-      editor.chain().focus().setImage({ src: url }).run()
+    // Create hidden file input
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'image/*'
+    input.onchange = async (e) => {
+      const file = e.target.files[0]
+      if (!file) return
+
+      setIsUploadingImage(true)
+      try {
+        const result = await uploadContentImage(file)
+        editor.chain().focus().setImage({ src: result.url }).run()
+      } catch (error) {
+        alert(`Error upload gambar: ${error.message}`)
+        console.error('Upload error:', error)
+      } finally {
+        setIsUploadingImage(false)
+      }
     }
+    input.click()
   }
 
   const colors = [
@@ -291,9 +310,14 @@ const RichTextEditor = ({ content, onChange }) => {
               variant="ghost"
               size="sm"
               onClick={addImage}
+              disabled={isUploadingImage}
               className="h-8 w-8 p-0"
             >
-              <ImageIcon className="h-4 w-4" />
+              {isUploadingImage ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <ImageIcon className="h-4 w-4" />
+              )}
             </Button>
           </div>
 
