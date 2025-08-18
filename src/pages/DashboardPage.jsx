@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState, useEffect, useCallback } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { 
   LayoutDashboard, 
@@ -26,12 +26,39 @@ import { useBlogs } from '../services/blogService'
 const DashboardPage = () => {
   const { logout } = useAuth()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [activeMenu, setActiveMenu] = useState('dashboard')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '')
+  const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || 'all')
   const [currentPage, setCurrentPage] = useState(1)
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchParams.get('search') || '')
   
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery)
+    }, 1500)
+
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
+  // Update URL params when search or status changes
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams)
+    if (debouncedSearchQuery) {
+      params.set('search', debouncedSearchQuery)
+    } else {
+      params.delete('search')
+    }
+    if (statusFilter && statusFilter !== 'all') {
+      params.set('status', statusFilter)
+    } else {
+      params.delete('status')
+    }
+    setSearchParams(params, { replace: true })
+  }, [debouncedSearchQuery, statusFilter, searchParams, setSearchParams])
+
   // Fetch blogs from API
   const { 
     data: blogsData, 
@@ -41,7 +68,7 @@ const DashboardPage = () => {
   } = useBlogs({ 
     page: currentPage, 
     limit: 10,
-    search: searchQuery || undefined,
+    search: debouncedSearchQuery || undefined,
     status: statusFilter !== 'all' ? statusFilter.toUpperCase() : undefined
   })
 
@@ -72,6 +99,12 @@ const DashboardPage = () => {
   const blogs = blogsData?.data?.blogs || []
   const pagination = blogsData?.data?.pagination || {}
   
+  // Handle search input change
+  const handleSearchChange = useCallback((e) => {
+    setSearchQuery(e.target.value)
+    setCurrentPage(1) // Reset to first page when searching
+  }, [])
+
   // Handle status filter change
   const handleStatusFilterChange = (newStatus) => {
     setStatusFilter(newStatus)
@@ -102,7 +135,7 @@ const DashboardPage = () => {
                 type="text"
                 placeholder="Cari blog post..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearchChange}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
