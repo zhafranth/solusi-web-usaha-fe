@@ -5,11 +5,9 @@ import { Link, useLocation } from "react-router-dom"
 import ScrollProgressBar from "./ScrollProgressBar"
 import { useAuth } from "../hooks/useAuth"
 import { useLogout } from "../services/authService"
-import LoginForm from "./LoginForm"
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [showLoginForm, setShowLoginForm] = useState(false)
   const location = useLocation()
   const { isAuthenticated, user } = useAuth()
   const logoutMutation = useLogout()
@@ -31,14 +29,6 @@ const Header = () => {
 
   const handleLogout = () => {
     logoutMutation.mutate()
-  }
-
-  const handleLoginClick = () => {
-    setShowLoginForm(true)
-  }
-
-  const handleCloseLogin = () => {
-    setShowLoginForm(false)
   }
 
   return (
@@ -92,9 +82,6 @@ const Header = () => {
               </div>
             ) : (
               <div className="flex items-center space-x-4">
-                <Button onClick={handleLoginClick} variant="outline" className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white font-body">
-                  Login
-                </Button>
                 <Button onClick={() => scrollToSection('contact')} className="bg-primary-green hover:bg-primary-green/90 text-white font-body">
                   Konsultasi Gratis
                 </Button>
@@ -151,9 +138,6 @@ const Header = () => {
                   </>
                 ) : (
                   <>
-                    <Button onClick={() => { handleLoginClick(); setIsMenuOpen(false); }} variant="outline" className="w-full border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white font-body">
-                      Login
-                    </Button>
                     <Button onClick={() => { scrollToSection('contact'); setIsMenuOpen(false); }} className="w-full bg-primary-green hover:bg-primary-green/90 text-white font-body">
                       Konsultasi Gratis
                     </Button>
@@ -167,10 +151,7 @@ const Header = () => {
     </header>
      <ScrollProgressBar />
      
-     {/* Login Form Modal */}
-     {showLoginForm && (
-       <LoginForm onClose={handleCloseLogin} />
-     )}
+
      </>
   )
 }

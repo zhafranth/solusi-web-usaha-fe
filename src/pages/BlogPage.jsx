@@ -14,66 +14,88 @@ import {
   Search,
   Filter,
   ArrowLeft,
+  Loader2,
 } from "lucide-react";
-import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
-import { blogPosts, getAllCategories } from "../data/blogPosts";
+import { useState, useEffect, useCallback } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { useBlogs } from "../services/blogService";
+import { useCategories } from "../services/categoryService";
 
 const BlogPage = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchTerm, setSearchTerm] = useState(
+    searchParams.get("search") || ""
+  );
+  const [selectedCategoryId, setSelectedCategoryId] = useState(
+    searchParams.get("categoryId") || ""
+  );
   const [currentPage, setCurrentPage] = useState(1);
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(
+    searchParams.get("search") || ""
+  );
   const postsPerPage = 9;
 
-  const categories = ["All", ...getAllCategories()];
+  // Fetch categories from API
+  const { data: categoriesData } = useCategories();
+  const categories = categoriesData || [];
 
-  // Filter dan search posts
-  const filteredPosts = useMemo(() => {
-    let filtered = blogPosts;
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 1500);
 
-    // Filter by category
-    if (selectedCategory !== "All") {
-      filtered = filtered.filter((post) => post.category === selectedCategory);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Update URL params when search or category changes
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    if (debouncedSearchTerm) {
+      params.set("search", debouncedSearchTerm);
+    } else {
+      params.delete("search");
     }
-
-    // Filter by search term
-    if (searchTerm) {
-      const lowercaseSearch = searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        (post) =>
-          post.title.toLowerCase().includes(lowercaseSearch) ||
-          post.excerpt.toLowerCase().includes(lowercaseSearch) ||
-          post.tags.some((tag) => tag.toLowerCase().includes(lowercaseSearch))
-      );
+    if (selectedCategoryId) {
+      params.set("categoryId", selectedCategoryId);
+    } else {
+      params.delete("categoryId");
     }
+    setSearchParams(params, { replace: true });
+  }, [debouncedSearchTerm, selectedCategoryId, searchParams, setSearchParams]);
 
-    return filtered.sort(
-      (a, b) => new Date(b.publishedAt) - new Date(a.publishedAt)
-    );
-  }, [searchTerm, selectedCategory]);
-
-  // Pagination
-  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
-  const startIndex = (currentPage - 1) * postsPerPage;
-  const currentPosts = filteredPosts.slice(
-    startIndex,
-    startIndex + postsPerPage
-  );
+  // Fetch blogs from API
+  const {
+    data: blogsData,
+    isLoading: isBlogsLoading,
+    error: blogsError,
+    refetch: refetchBlogs,
+  } = useBlogs({
+    page: currentPage,
+    limit: postsPerPage,
+    search: debouncedSearchTerm || undefined,
+    categoryId: selectedCategoryId || undefined,
+    status: "PUBLISHED",
+  });
+  // Get blogs data from API response
+  const blogs = blogsData?.data?.blogs || [];
+  const pagination = blogsData?.data?.pagination || {};
+  const totalPages = Math.ceil((pagination.totalCount || 0) / postsPerPage);
 
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "long", day: "numeric" };
     return new Date(dateString).toLocaleDateString("id-ID", options);
   };
 
-  const handleCategoryChange = (category) => {
-    setSelectedCategory(category);
+  const handleCategoryChange = (categoryId) => {
+    setSelectedCategoryId(categoryId);
     setCurrentPage(1);
   };
 
-  const handleSearchChange = (e) => {
+  const handleSearchChange = useCallback((e) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1);
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -121,17 +143,27 @@ const BlogPage = () => {
 
             {/* Category Filter */}
             <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => handleCategoryChange("")}
+                className={`px-4 py-2 rounded-full font-body text-sm transition-colors ${
+                  selectedCategoryId === ""
+                    ? "bg-primary-blue text-white"
+                    : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
+                }`}
+              >
+                Semua
+              </button>
               {categories?.map((category) => (
                 <button
-                  key={category}
-                  onClick={() => handleCategoryChange(category)}
+                  key={category.id}
+                  onClick={() => handleCategoryChange(category.id.toString())}
                   className={`px-4 py-2 rounded-full font-body text-sm transition-colors ${
-                    selectedCategory === category
+                    selectedCategoryId === category.id.toString()
                       ? "bg-primary-blue text-white"
                       : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
                   }`}
                 >
-                  {category}
+                  {category.name}
                 </button>
               ))}
             </div>
@@ -139,13 +171,13 @@ const BlogPage = () => {
         </div>
 
         {/* Featured Posts */}
-        {searchTerm === "" && selectedCategory === "All" && (
+        {searchTerm === "" && selectedCategoryId === "" && (
           <div className="mb-16">
             <h2 className="text-3xl font-heading font-bold text-primary-blue mb-8">
               Artikel Unggulan
             </h2>
             <div className="grid lg:grid-cols-3 gap-8">
-              {blogPosts
+              {blogs
                 .filter((post) => post.featured)
                 .slice(0, 3)
                 .map((post) => (
@@ -209,30 +241,68 @@ const BlogPage = () => {
         {/* All Posts */}
         <div className="mb-12">
           <h2 className="text-3xl font-heading font-bold text-primary-blue mb-8">
-            {searchTerm || selectedCategory !== "All"
+            {searchTerm || selectedCategoryId !== ""
               ? "Hasil Pencarian"
               : "Semua Artikel"}
             <span className="text-lg font-normal text-gray-600 ml-2">
-              ({filteredPosts.length} artikel)
+              ({pagination.totalCount || 0} artikel)
             </span>
           </h2>
 
-          {currentPosts.length > 0 ? (
+          {/* Loading State */}
+          {isBlogsLoading && (
+            <div className="text-center py-12">
+              <Loader2 className="w-8 h-8 text-primary-blue mx-auto mb-4 animate-spin" />
+              <p className="text-gray-500">Memuat artikel...</p>
+            </div>
+          )}
+
+          {/* Error State */}
+          {blogsError && (
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-4">
+                <Search size={64} className="mx-auto" />
+              </div>
+              <h3 className="text-xl font-heading font-bold text-gray-600 mb-2">
+                Gagal memuat artikel
+              </h3>
+              <p className="text-gray-500 font-body mb-4">
+                Terjadi kesalahan saat memuat artikel.
+              </p>
+              <Button onClick={() => refetchBlogs()} variant="outline">
+                Coba Lagi
+              </Button>
+            </div>
+          )}
+
+          {!isBlogsLoading && !blogsError && blogs.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {currentPosts.map((post) => (
+              {blogs.map((post) => (
                 <Card
                   key={post.id}
-                  className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg overflow-hidden bg-white"
+                  className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg overflow-hidden bg-white flex flex-col h-full"
                 >
                   <div className="relative overflow-hidden">
-                    <div className="w-full h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                      <span className="text-gray-500 font-heading text-lg">
-                        Blog Article
-                      </span>
-                    </div>
+                    {post.featuredImage ? (
+                      <div className="w-full h-48 relative">
+                        <img
+                          src={post.featuredImage}
+                          alt={post.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-full h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                        <img
+                          src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=1920&auto=format&fit=crop"
+                          alt="Default blog post"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
                     <div className="absolute top-4 left-4">
                       <span className="bg-primary-blue text-white px-3 py-1 rounded-full text-xs font-body font-medium">
-                        {post.category}
+                        {post.category?.name}
                       </span>
                     </div>
                   </div>
@@ -244,36 +314,41 @@ const BlogPage = () => {
                       {post.excerpt}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-0">
+                  <CardContent className="pt-0 flex flex-col flex-grow">
                     <div className="flex items-center justify-between text-sm text-gray-500 font-body mb-4">
                       <div className="flex items-center space-x-4">
                         <div className="flex items-center space-x-1">
                           <Calendar size={14} />
-                          <span>{formatDate(post.publishedAt)}</span>
+                          <span>{formatDate(post.createdAt)}</span>
                         </div>
-                        <div className="flex items-center space-x-1">
+                        {/* <div className="flex items-center space-x-1">
                           <Clock size={14} />
                           <span>{post.readTime}</span>
-                        </div>
+                        </div> */}
                       </div>
                     </div>
 
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-1 mb-4">
-                      {post.tags.slice(0, 3).map((tag, index) => (
-                        <span
-                          key={index}
-                          className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-body"
-                        >
-                          #{tag}
-                        </span>
-                      ))}
+                    {/* Tags - dengan min-height untuk konsistensi */}
+                    <div className="flex flex-wrap gap-1 mb-4 ">
+                      {post.tags && post.tags.length > 0 ? (
+                        post.tags.slice(0, 3).map((tag, index) => (
+                          <span
+                            key={index}
+                            className="bg-gray-100 self-stretch text-gray-600 px-2 py-1 rounded text-xs font-body"
+                          >
+                            #{tag}
+                          </span>
+                        ))
+                      ) : (
+                        <div className="h-6"></div>
+                      )}
                     </div>
 
-                    <div className="flex items-center justify-between">
+                    {/* Author dan Button - selalu di bawah */}
+                    <div className="flex items-center justify-between mt-auto">
                       <div className="flex items-center space-x-1 text-sm text-gray-500">
                         <User size={14} />
-                        <span className="font-body">{post.author}</span>
+                        <span className="font-body">{post.author?.nama}</span>
                       </div>
                       <Button variant="outline" size="sm" className="font-body">
                         Baca Selengkapnya
@@ -284,17 +359,20 @@ const BlogPage = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-12">
-              <div className="text-gray-400 mb-4">
-                <Search size={64} className="mx-auto" />
+            !isBlogsLoading &&
+            !blogsError && (
+              <div className="text-center py-12">
+                <div className="text-gray-400 mb-4">
+                  <Search size={64} className="mx-auto" />
+                </div>
+                <h3 className="text-xl font-heading font-bold text-gray-600 mb-2">
+                  Artikel tidak ditemukan
+                </h3>
+                <p className="text-gray-500 font-body">
+                  Coba gunakan kata kunci yang berbeda atau pilih kategori lain.
+                </p>
               </div>
-              <h3 className="text-xl font-heading font-bold text-gray-600 mb-2">
-                Artikel tidak ditemukan
-              </h3>
-              <p className="text-gray-500 font-body">
-                Coba gunakan kata kunci yang berbeda atau pilih kategori lain.
-              </p>
-            </div>
+            )
           )}
         </div>
 
