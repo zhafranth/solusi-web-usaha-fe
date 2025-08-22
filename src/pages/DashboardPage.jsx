@@ -21,7 +21,7 @@ import {
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
-import { useBlogs } from '../services/blogService'
+import { useBlogs, deleteBlog } from '../services/blogService'
 
 const DashboardPage = () => {
   const { logout } = useAuth()
@@ -33,6 +33,9 @@ const DashboardPage = () => {
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || 'all')
   const [currentPage, setCurrentPage] = useState(1)
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchParams.get('search') || '')
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [blogToDelete, setBlogToDelete] = useState(null)
+  const [isDeleting, setIsDeleting] = useState(false)
   
   // Debounce search query
   useEffect(() => {
@@ -109,6 +112,34 @@ const DashboardPage = () => {
   const handleStatusFilterChange = (newStatus) => {
     setStatusFilter(newStatus)
     setCurrentPage(1) // Reset to first page when filtering
+  }
+
+  // Handle delete blog
+  const handleDeleteClick = (blog) => {
+    setBlogToDelete(blog)
+    setShowDeleteModal(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!blogToDelete) return
+    
+    setIsDeleting(true)
+    try {
+      await deleteBlog(blogToDelete.id)
+      setShowDeleteModal(false)
+      setBlogToDelete(null)
+      refetchBlogs() // Refresh the blog list
+    } catch (error) {
+      console.error('Error deleting blog:', error)
+      alert('Gagal menghapus blog post: ' + error.message)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false)
+    setBlogToDelete(null)
   }
 
   const renderBlogList = () => {
@@ -247,7 +278,12 @@ const DashboardPage = () => {
                       <Button variant="outline" size="sm" className="text-green-600 hover:text-green-700">
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-red-600 hover:text-red-700"
+                        onClick={() => handleDeleteClick(post)}
+                      >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
@@ -534,6 +570,59 @@ const DashboardPage = () => {
           </div>
         </main>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center mb-4">
+              <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <Trash2 className="w-5 h-5 text-red-600" />
+              </div>
+              <div className="ml-4">
+                <h3 className="text-lg font-medium text-gray-900">
+                  Hapus Blog Post
+                </h3>
+                <p className="text-sm text-gray-500">
+                  Tindakan ini tidak dapat dibatalkan
+                </p>
+              </div>
+            </div>
+            
+            <div className="mb-6">
+              <p className="text-gray-700">
+                Apakah Anda yakin ingin menghapus blog post{' '}
+                <span className="font-semibold">"{blogToDelete?.title}"</span>?
+              </p>
+            </div>
+            
+            <div className="flex justify-end space-x-3">
+              <Button
+                variant="outline"
+                onClick={handleDeleteCancel}
+                disabled={isDeleting}
+              >
+                Batal
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Menghapus...
+                  </>
+                ) : (
+                  'Hapus'
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
