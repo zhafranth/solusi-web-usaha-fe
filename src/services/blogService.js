@@ -69,6 +69,97 @@ export const createBlog = async (blogData) => {
 };
 
 /**
+ * Mengambil detail blog berdasarkan ID
+ * @param {number|string} id - ID blog yang akan diambil
+ * @returns {Promise<Object>} - Response dari server
+ */
+export const getBlogById = async (id) => {
+  try {
+    if (!id) {
+      throw new Error('ID blog wajib diisi')
+    }
+
+    const response = await api.get(`/api/blog/${id}`)
+    return response.data
+  } catch (error) {
+    console.error('Error fetching blog:', error)
+    
+    // Handle different types of errors
+    if (error.response) {
+      // Server responded with error status
+      const errorMessage = error.response.data?.message || 'Gagal mengambil blog post'
+      throw new Error(errorMessage)
+    } else if (error.request) {
+      // Network error
+      throw new Error('Tidak dapat terhubung ke server')
+    } else {
+      // Other error
+      throw error
+    }
+  }
+}
+
+/**
+ * Memperbarui blog post berdasarkan ID
+ * @param {number|string} id - ID blog yang akan diperbarui
+ * @param {Object} blogData - Data blog yang akan diperbarui
+ * @param {string} blogData.title - Judul post (wajib)
+ * @param {string} blogData.excerpt - Ringkasan/excerpt (wajib)
+ * @param {string} blogData.content - Konten blog (wajib)
+ * @param {number} blogData.categoryId - ID kategori (wajib, integer positif)
+ * @param {string} [blogData.featuredImage] - URL gambar utama (opsional)
+ * @param {string[]} [blogData.tags] - Array tag (opsional)
+ * @param {string} [blogData.status] - Status publikasi (opsional)
+ * @returns {Promise<Object>} - Response dari server
+ */
+export const updateBlog = async (id, blogData) => {
+  try {
+    if (!id) {
+      throw new Error('ID blog wajib diisi')
+    }
+
+    // Validasi field wajib
+    if (!blogData.title || !blogData.excerpt || !blogData.content || !blogData.categoryId) {
+      throw new Error('Field title, excerpt, content, dan categoryId wajib diisi')
+    }
+
+    // Validasi categoryId harus berupa integer positif
+    if (!Number.isInteger(blogData.categoryId) || blogData.categoryId <= 0) {
+      throw new Error('categoryId harus berupa integer positif')
+    }
+
+    // Prepare payload sesuai dengan schema
+    const payload = {
+      title: blogData.title.trim(),
+      excerpt: blogData.excerpt.trim(),
+      content: blogData.content.trim(),
+      categoryId: blogData.categoryId,
+      ...(blogData.featuredImage && { featuredImage: blogData.featuredImage }),
+      ...(blogData.tags && Array.isArray(blogData.tags) && blogData.tags.length > 0 && { tags: blogData.tags }),
+      ...(blogData.status && { status: blogData.status })
+    }
+
+    const response = await api.put(`/api/blog/${id}`, payload)
+    return response.data
+  } catch (error) {
+    console.error('Error updating blog:', error)
+    
+    // Handle different types of errors
+    if (error.response) {
+      // Server responded with error status
+      const errorMessage = error.response.data?.message || 'Gagal memperbarui blog post'
+      throw new Error(errorMessage)
+    } else if (error.request) {
+      // Network error
+      throw new Error('Tidak dapat terhubung ke server')
+    } else {
+      // Other error
+      throw error
+    }
+  }
+}
+
+/**
  * Mengambil list blog posts dari server
  * @param {Object} params - Parameter query
  * @param {number} [params.page=1] - Halaman yang diminta

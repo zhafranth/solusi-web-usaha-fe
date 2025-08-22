@@ -33,7 +33,7 @@ import {
   Loader2
 } from 'lucide-react'
 import { Button } from './ui/button'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { uploadContentImage } from '../services/uploadService'
 
 const RichTextEditor = ({ content, onChange }) => {
@@ -74,6 +74,13 @@ const RichTextEditor = ({ content, onChange }) => {
       },
     },
   })
+
+  // Update editor content when content prop changes
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content || '')
+    }
+  }, [content, editor])
 
   if (!editor) {
     return null
@@ -124,6 +131,7 @@ const RichTextEditor = ({ content, onChange }) => {
           {/* Text Formatting */}
           <div className="flex gap-1 border-r border-gray-300 pr-2 mr-2">
             <Button
+              type="button"
               variant={editor.isActive('bold') ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleBold().run()}
@@ -132,6 +140,7 @@ const RichTextEditor = ({ content, onChange }) => {
               <Bold className="h-4 w-4" />
             </Button>
             <Button
+              type="button"
               variant={editor.isActive('italic') ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleItalic().run()}
@@ -140,6 +149,7 @@ const RichTextEditor = ({ content, onChange }) => {
               <Italic className="h-4 w-4" />
             </Button>
             <Button
+              type="button"
               variant={editor.isActive('underline') ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleUnderline().run()}
@@ -148,6 +158,7 @@ const RichTextEditor = ({ content, onChange }) => {
               <UnderlineIcon className="h-4 w-4" />
             </Button>
             <Button
+              type="button"
               variant={editor.isActive('strike') ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleStrike().run()}
@@ -156,6 +167,7 @@ const RichTextEditor = ({ content, onChange }) => {
               <Strikethrough className="h-4 w-4" />
             </Button>
             <Button
+              type="button"
               variant={editor.isActive('code') ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleCode().run()}
@@ -165,6 +177,7 @@ const RichTextEditor = ({ content, onChange }) => {
               <Code className="h-4 w-4" />
             </Button>
             <Button
+              type="button"
               variant={editor.isActive('codeBlock') ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleCodeBlock().run()}
@@ -178,6 +191,7 @@ const RichTextEditor = ({ content, onChange }) => {
           {/* Headings */}
           <div className="flex gap-1 border-r border-gray-300 pr-2 mr-2">
             <Button
+              type="button"
               variant={editor.isActive('heading', { level: 1 }) ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
@@ -186,6 +200,7 @@ const RichTextEditor = ({ content, onChange }) => {
               <Heading1 className="h-4 w-4" />
             </Button>
             <Button
+              type="button"
               variant={editor.isActive('heading', { level: 2 }) ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
@@ -194,6 +209,7 @@ const RichTextEditor = ({ content, onChange }) => {
               <Heading2 className="h-4 w-4" />
             </Button>
             <Button
+              type="button"
               variant={editor.isActive('heading', { level: 3 }) ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
@@ -206,6 +222,7 @@ const RichTextEditor = ({ content, onChange }) => {
           {/* Lists */}
           <div className="flex gap-1 border-r border-gray-300 pr-2 mr-2">
             <Button
+              type="button"
               variant={editor.isActive('bulletList') ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleBulletList().run()}
@@ -214,6 +231,7 @@ const RichTextEditor = ({ content, onChange }) => {
               <List className="h-4 w-4" />
             </Button>
             <Button
+              type="button"
               variant={editor.isActive('orderedList') ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleOrderedList().run()}
@@ -222,6 +240,7 @@ const RichTextEditor = ({ content, onChange }) => {
               <ListOrdered className="h-4 w-4" />
             </Button>
             <Button
+              type="button"
               variant={editor.isActive('blockquote') ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().toggleBlockquote().run()}
@@ -234,6 +253,7 @@ const RichTextEditor = ({ content, onChange }) => {
           {/* Alignment */}
           <div className="flex gap-1 border-r border-gray-300 pr-2 mr-2">
             <Button
+              type="button"
               variant={editor.isActive({ textAlign: 'left' }) ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().setTextAlign('left').run()}
@@ -242,6 +262,7 @@ const RichTextEditor = ({ content, onChange }) => {
               <AlignLeft className="h-4 w-4" />
             </Button>
             <Button
+              type="button"
               variant={editor.isActive({ textAlign: 'center' }) ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().setTextAlign('center').run()}
@@ -250,6 +271,7 @@ const RichTextEditor = ({ content, onChange }) => {
               <AlignCenter className="h-4 w-4" />
             </Button>
             <Button
+              type="button"
               variant={editor.isActive({ textAlign: 'right' }) ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().setTextAlign('right').run()}
@@ -258,6 +280,7 @@ const RichTextEditor = ({ content, onChange }) => {
               <AlignRight className="h-4 w-4" />
             </Button>
             <Button
+              type="button"
               variant={editor.isActive({ textAlign: 'justify' }) ? 'default' : 'ghost'}
               size="sm"
               onClick={() => editor.chain().focus().setTextAlign('justify').run()}
@@ -270,6 +293,7 @@ const RichTextEditor = ({ content, onChange }) => {
           {/* Color Picker */}
           <div className="relative border-r border-gray-300 pr-2 mr-2">
             <Button
+              type="button"
               variant="ghost"
               size="sm"
               onClick={() => setShowColorPicker(!showColorPicker)}
@@ -299,6 +323,7 @@ const RichTextEditor = ({ content, onChange }) => {
           {/* Link & Image */}
           <div className="flex gap-1 border-r border-gray-300 pr-2 mr-2">
             <Button
+              type="button"
               variant="ghost"
               size="sm"
               onClick={() => setShowLinkDialog(true)}
@@ -307,6 +332,7 @@ const RichTextEditor = ({ content, onChange }) => {
               <LinkIcon className="h-4 w-4" />
             </Button>
             <Button
+              type="button"
               variant="ghost"
               size="sm"
               onClick={addImage}
@@ -324,6 +350,7 @@ const RichTextEditor = ({ content, onChange }) => {
           {/* Undo/Redo */}
           <div className="flex gap-1">
             <Button
+              type="button"
               variant="ghost"
               size="sm"
               onClick={() => editor.chain().focus().undo().run()}
@@ -333,6 +360,7 @@ const RichTextEditor = ({ content, onChange }) => {
               <Undo className="h-4 w-4" />
             </Button>
             <Button
+              type="button"
               variant="ghost"
               size="sm"
               onClick={() => editor.chain().focus().redo().run()}
@@ -365,6 +393,7 @@ const RichTextEditor = ({ content, onChange }) => {
             />
             <div className="flex gap-2 justify-end">
               <Button
+                type="button"
                 variant="outline"
                 onClick={() => {
                   setShowLinkDialog(false)
@@ -373,7 +402,7 @@ const RichTextEditor = ({ content, onChange }) => {
               >
                 Batal
               </Button>
-              <Button onClick={addLink}>
+              <Button type="button" onClick={addLink}>
                 Tambah Link
               </Button>
             </div>

@@ -114,6 +114,11 @@ const DashboardPage = () => {
     setCurrentPage(1) // Reset to first page when filtering
   }
 
+  // Handle edit blog
+  const handleEditClick = (blog) => {
+    navigate(`/dashboard/edit-post/${blog.id}`)
+  }
+
   // Handle delete blog
   const handleDeleteClick = (blog) => {
     setBlogToDelete(blog)
@@ -275,7 +280,12 @@ const DashboardPage = () => {
                       <Button variant="outline" size="sm" className="text-blue-600 hover:text-blue-700">
                         <Eye className="w-4 h-4" />
                       </Button>
-                      <Button variant="outline" size="sm" className="text-green-600 hover:text-green-700">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-green-600 hover:text-green-700"
+                        onClick={() => handleEditClick(post)}
+                      >
                         <Edit className="w-4 h-4" />
                       </Button>
                       <Button 
