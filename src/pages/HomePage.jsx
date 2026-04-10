@@ -11,22 +11,20 @@ const HomePage = () => {
     <div className="min-h-screen bg-white">
       <Header />
       <main>
+        <section id="home">
+          <Hero />
+        </section>
         <AnimatedSection>
-          <section id="home">
-            <Hero />
-          </section>
-        </AnimatedSection>
-        <AnimatedSection delay={100}>
           <section id="services">
             <Services />
           </section>
         </AnimatedSection>
-        <AnimatedSection delay={200}>
+        <AnimatedSection delay={100}>
           <section id="about">
             <About />
           </section>
         </AnimatedSection>
-        <AnimatedSection delay={300}>
+        <AnimatedSection delay={150}>
           <section id="contact">
             <Contact />
           </section>

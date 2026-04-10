@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
-import { 
-  LayoutDashboard, 
-  FileText, 
-  Menu, 
-  X, 
-  LogOut, 
+import {
+  LayoutDashboard,
+  FileText,
+  Menu,
+  X,
+  LogOut,
   User,
   Settings,
   Bell,
@@ -16,11 +16,14 @@ import {
   Edit,
   Trash2,
   Calendar,
-  Clock,
-  Loader2
+  Loader2,
+  Plus,
+  TrendingUp,
+  MessageSquare,
+  ExternalLink,
 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '../components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { useBlogs, deleteBlog } from '../services/blogService'
 
 const DashboardPage = () => {
@@ -36,17 +39,14 @@ const DashboardPage = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [blogToDelete, setBlogToDelete] = useState(null)
   const [isDeleting, setIsDeleting] = useState(false)
-  
-  // Debounce search query
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery)
     }, 1500)
-
     return () => clearTimeout(timer)
   }, [searchQuery])
 
-  // Update URL params when search or status changes
   useEffect(() => {
     const params = new URLSearchParams(searchParams)
     if (debouncedSearchQuery) {
@@ -62,30 +62,21 @@ const DashboardPage = () => {
     setSearchParams(params, { replace: true })
   }, [debouncedSearchQuery, statusFilter, searchParams, setSearchParams])
 
-  // Fetch blogs from API
-  const { 
-    data: blogsData, 
-    isLoading: isBlogsLoading, 
+  const {
+    data: blogsData,
+    isLoading: isBlogsLoading,
     error: blogsError,
     refetch: refetchBlogs
-  } = useBlogs({ 
-    page: currentPage, 
+  } = useBlogs({
+    page: currentPage,
     limit: 10,
     search: debouncedSearchQuery || undefined,
     status: statusFilter !== 'all' ? statusFilter.toUpperCase() : undefined
   })
 
   const menuItems = [
-    {
-      id: 'dashboard',
-      label: 'Dashboard',
-      icon: LayoutDashboard
-    },
-    {
-      id: 'blog',
-      label: 'Blog Posts',
-      icon: FileText
-    }
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'blog', label: 'Blog Posts', icon: FileText },
   ]
 
   const handleMenuClick = (menuId) => {
@@ -98,28 +89,23 @@ const DashboardPage = () => {
     navigate('/auth', { replace: true })
   }
 
-  // Get blogs data from API response
   const blogs = blogsData?.data?.blogs || []
   const pagination = blogsData?.data?.pagination || {}
-  
-  // Handle search input change
+
   const handleSearchChange = useCallback((e) => {
     setSearchQuery(e.target.value)
-    setCurrentPage(1) // Reset to first page when searching
+    setCurrentPage(1)
   }, [])
 
-  // Handle status filter change
   const handleStatusFilterChange = (newStatus) => {
     setStatusFilter(newStatus)
-    setCurrentPage(1) // Reset to first page when filtering
+    setCurrentPage(1)
   }
 
-  // Handle edit blog
   const handleEditClick = (blog) => {
     navigate(`/dashboard/edit-post/${blog.id}`)
   }
 
-  // Handle delete blog
   const handleDeleteClick = (blog) => {
     setBlogToDelete(blog)
     setShowDeleteModal(true)
@@ -127,13 +113,12 @@ const DashboardPage = () => {
 
   const handleDeleteConfirm = async () => {
     if (!blogToDelete) return
-    
     setIsDeleting(true)
     try {
       await deleteBlog(blogToDelete.id)
       setShowDeleteModal(false)
       setBlogToDelete(null)
-      refetchBlogs() // Refresh the blog list
+      refetchBlogs()
     } catch (error) {
       console.error('Error deleting blog:', error)
       alert('Gagal menghapus blog post: ' + error.message)
@@ -147,492 +132,442 @@ const DashboardPage = () => {
     setBlogToDelete(null)
   }
 
-  const renderBlogList = () => {
-    return (
-      <div className="p-6">
-        <div className="mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">
-              Kelola Blog Posts
-            </h1>
-            <Link to="/dashboard/add-post">
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                <FileText className="w-4 h-4 mr-2" />
-                Tambah Post Baru
-              </Button>
-            </Link>
-          </div>
+  const renderBlogList = () => (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-heading font-bold text-gray-900">Blog Posts</h1>
+          <p className="text-sm text-gray-500 mt-1">Kelola semua artikel blog Anda</p>
+        </div>
+        <Link to="/dashboard/add-post">
+          <Button className="bg-primary-blue hover:bg-primary-blue/90 rounded-xl shadow-md shadow-primary-blue/20">
+            <Plus className="w-4 h-4 mr-2" />
+            Tambah Post
+          </Button>
+        </Link>
+      </div>
 
-          {/* Search and Filter */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Cari blog post..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-gray-500" />
-              <select
-                value={statusFilter}
-                onChange={(e) => handleStatusFilterChange(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      {/* Search and Filter */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <input
+            type="text"
+            placeholder="Cari blog post..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-blue/20 focus:border-primary-blue text-sm outline-none transition-all"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <Filter className="w-4 h-4 text-gray-400" />
+          <select
+            value={statusFilter}
+            onChange={(e) => handleStatusFilterChange(e.target.value)}
+            className="px-3 py-2.5 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-blue/20 focus:border-primary-blue text-sm outline-none"
+          >
+            <option value="all">Semua Status</option>
+            <option value="published">Published</option>
+            <option value="draft">Draft</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Blog List */}
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100">
+          <h3 className="text-sm font-semibold text-gray-900">
+            Daftar Blog Posts ({pagination.totalCount || 0})
+          </h3>
+        </div>
+
+        {isBlogsLoading && (
+          <div className="p-12 text-center">
+            <Loader2 className="w-6 h-6 text-primary-blue mx-auto mb-3 animate-spin" />
+            <p className="text-gray-400 text-sm">Memuat blog posts...</p>
+          </div>
+        )}
+
+        {blogsError && (
+          <div className="p-12 text-center">
+            <FileText className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+            <p className="text-red-500 text-sm mb-3">Gagal memuat blog posts</p>
+            <Button onClick={() => refetchBlogs()} variant="outline" size="sm" className="rounded-xl">
+              Coba Lagi
+            </Button>
+          </div>
+        )}
+
+        {!isBlogsLoading && !blogsError && blogs.length === 0 && (
+          <div className="p-12 text-center">
+            <FileText className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+            <p className="text-gray-400 text-sm">Tidak ada blog post ditemukan</p>
+          </div>
+        )}
+
+        {!isBlogsLoading && !blogsError && blogs.length > 0 && (
+          <div className="divide-y divide-gray-50">
+            {blogs.map((post) => (
+              <motion.div
+                key={post.id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="px-6 py-4 hover:bg-gray-50/50 transition-colors"
               >
-                <option value="all">Semua Status</option>
-                <option value="published">Published</option>
-                <option value="draft">Draft</option>
-              </select>
-            </div>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <h4 className="text-sm font-semibold text-gray-900 truncate hover:text-primary-blue cursor-pointer transition-colors">
+                        {post.title}
+                      </h4>
+                      <span className={`px-2 py-0.5 text-xs font-medium rounded-lg flex-shrink-0 ${
+                        post.status === 'PUBLISHED'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                          : 'bg-amber-50 text-amber-700 border border-amber-100'
+                      }`}>
+                        {post.status}
+                      </span>
+                    </div>
+                    <p className="text-gray-500 text-xs mb-2 line-clamp-1">
+                      {post.excerpt}
+                    </p>
+                    <div className="flex items-center gap-3 text-xs text-gray-400">
+                      <div className="flex items-center gap-1">
+                        <User className="w-3 h-3" />
+                        <span>{post.author?.nama || 'Unknown'}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        <span>{new Date(post.createdAt).toLocaleDateString('id-ID')}</span>
+                      </div>
+                      <span className="px-2 py-0.5 bg-primary-blue/5 text-primary-blue text-xs rounded-lg">
+                        {post.category?.name || 'Uncategorized'}
+                      </span>
+                      {post.tags && post.tags.length > 0 && (
+                        <div className="flex gap-1">
+                          {post.tags.slice(0, 2).map((tag, index) => (
+                            <span key={index} className="px-2 py-0.5 bg-gray-50 text-gray-500 text-xs rounded-lg border border-gray-100">
+                              {tag}
+                            </span>
+                          ))}
+                          {post.tags.length > 2 && (
+                            <span className="text-xs text-gray-400">+{post.tags.length - 2}</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <button className="p-2 rounded-lg text-gray-400 hover:text-primary-blue hover:bg-primary-blue/5 transition-all">
+                      <Eye className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleEditClick(post)}
+                      className="p-2 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteClick(post)}
+                      className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
-        </div>
+        )}
 
-        {/* Blog Posts List */}
-        <div className="bg-white rounded-lg shadow-sm border">
-          <div className="p-4 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Daftar Blog Posts ({pagination.totalCount || 0})
-            </h3>
-          </div>
-          
-          {/* Loading State */}
-          {isBlogsLoading && (
-            <div className="p-8 text-center">
-              <Loader2 className="w-8 h-8 text-blue-600 mx-auto mb-4 animate-spin" />
-              <p className="text-gray-500">Memuat blog posts...</p>
-            </div>
-          )}
-          
-          {/* Error State */}
-          {blogsError && (
-            <div className="p-8 text-center">
-              <FileText className="w-12 h-12 text-red-400 mx-auto mb-4" />
-              <p className="text-red-500 mb-4">Gagal memuat blog posts</p>
-              <Button onClick={() => refetchBlogs()} variant="outline">
-                Coba Lagi
+        {/* Pagination */}
+        {!isBlogsLoading && !blogsError && pagination.totalPages > 1 && (
+          <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+            <p className="text-xs text-gray-400">
+              Halaman {pagination.currentPage} dari {pagination.totalPages} ({pagination.totalCount} total)
+            </p>
+            <div className="flex gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!pagination.hasPrevPage}
+                onClick={() => setCurrentPage(currentPage - 1)}
+                className="rounded-lg text-xs"
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!pagination.hasNextPage}
+                onClick={() => setCurrentPage(currentPage + 1)}
+                className="rounded-lg text-xs"
+              >
+                Next
               </Button>
             </div>
-          )}
-          
-          {/* Empty State */}
-          {!isBlogsLoading && !blogsError && blogs.length === 0 && (
-            <div className="p-8 text-center">
-              <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">Tidak ada blog post yang ditemukan</p>
-            </div>
-          )}
-          
-          {/* Blog Posts */}
-          {!isBlogsLoading && !blogsError && blogs.length > 0 && (
-            <div className="divide-y divide-gray-200">
-              {blogs.map((post) => (
-                <div key={post.id} className="p-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h4 className="text-lg font-semibold text-gray-900 hover:text-blue-600 cursor-pointer">
-                          {post.title}
-                        </h4>
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          post.status === 'PUBLISHED' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {post.status}
-                        </span>
-                      </div>
-                      
-                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                        {post.excerpt}
-                      </p>
-                      
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
-                        <div className="flex items-center gap-1">
-                          <User className="w-4 h-4" />
-                          <span>{post.author?.nama || 'Unknown'}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          <span>{new Date(post.createdAt).toLocaleDateString('id-ID')}</span>
-                        </div>
-                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                          {post.category?.name || 'Uncategorized'}
-                        </span>
-                        {post.tags && post.tags.length > 0 && (
-                          <div className="flex gap-1">
-                            {post.tags.slice(0, 2).map((tag, index) => (
-                              <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                                {tag}
-                              </span>
-                            ))}
-                            {post.tags.length > 2 && (
-                              <span className="text-xs text-gray-500">+{post.tags.length - 2}</span>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 ml-4">
-                      <Button variant="outline" size="sm" className="text-blue-600 hover:text-blue-700">
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="text-green-600 hover:text-green-700"
-                        onClick={() => handleEditClick(post)}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="text-red-600 hover:text-red-700"
-                        onClick={() => handleDeleteClick(post)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+
+  const renderDashboard = () => (
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-2xl font-heading font-bold text-gray-900">Dashboard</h1>
+        <p className="text-sm text-gray-500 mt-1">Selamat datang di panel admin SolusiWeb Usaha</p>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {[
+          { label: "Total Blog Posts", value: pagination.totalCount || 0, icon: FileText, color: "from-primary-blue to-blue-400", change: null },
+          { label: "Total Visitors", value: "1,234", icon: TrendingUp, color: "from-primary-green to-emerald-400", change: "+15%" },
+          { label: "Notifications", value: "5", icon: Bell, color: "from-amber-500 to-orange-400", change: null },
+        ].map((stat, i) => {
+          const Icon = stat.icon
+          return (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+              className="bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-glass transition-all"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-sm`}>
+                  <Icon className="w-5 h-5 text-white" />
                 </div>
-              ))}
-            </div>
-          )}
-          
-          {/* Pagination */}
-          {!isBlogsLoading && !blogsError && pagination.totalPages > 1 && (
-            <div className="p-4 border-t border-gray-200 flex items-center justify-between">
-              <div className="text-sm text-gray-500">
-                Halaman {pagination.currentPage} dari {pagination.totalPages} 
-                ({pagination.totalCount} total blog posts)
+                {stat.change && (
+                  <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
+                    {stat.change}
+                  </span>
+                )}
               </div>
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  disabled={!pagination.hasPrevPage}
-                  onClick={() => setCurrentPage(currentPage - 1)}
-                >
-                  Previous
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  disabled={!pagination.hasNextPage}
-                  onClick={() => setCurrentPage(currentPage + 1)}
-                >
-                  Next
-                </Button>
+              <div className="text-2xl font-heading font-bold text-gray-900 mb-0.5">{stat.value}</div>
+              <p className="text-xs text-gray-400">{stat.label}</p>
+            </motion.div>
+          )
+        })}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Activities */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <h3 className="text-sm font-heading font-bold text-gray-900 mb-4">Recent Activities</h3>
+          <div className="space-y-4">
+            {[
+              { text: "Blog post baru dipublikasi", time: "2 jam lalu", color: "bg-primary-blue" },
+              { text: "Pesan kontak baru diterima", time: "4 jam lalu", color: "bg-primary-green" },
+              { text: "Website backup completed", time: "1 hari lalu", color: "bg-amber-500" },
+            ].map((activity, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <div className={`w-2 h-2 rounded-full ${activity.color} flex-shrink-0`} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-gray-700 truncate">{activity.text}</p>
+                  <p className="text-xs text-gray-400">{activity.time}</p>
+                </div>
               </div>
-            </div>
-          )}
+            ))}
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <h3 className="text-sm font-heading font-bold text-gray-900 mb-4">Quick Actions</h3>
+          <div className="space-y-2.5">
+            <Button
+              onClick={() => handleMenuClick('blog')}
+              className="w-full justify-start bg-primary-blue hover:bg-primary-blue/90 text-white rounded-xl"
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Kelola Blog Posts
+            </Button>
+            <Button variant="outline" className="w-full justify-start rounded-xl">
+              <MessageSquare className="w-4 h-4 mr-2" />
+              Lihat Pesan Kontak
+            </Button>
+            <Button variant="outline" className="w-full justify-start rounded-xl">
+              <Settings className="w-4 h-4 mr-2" />
+              Pengaturan Website
+            </Button>
+          </div>
         </div>
       </div>
-    )
-  }
-
-  const renderContent = () => {
-    if (activeMenu === 'blog') {
-      return renderBlogList()
-    }
-
-    return (
-      <div className="p-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Dashboard Admin
-          </h1>
-          <p className="text-gray-600">
-            Selamat datang di panel admin SolusiWeb Usaha
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <Card className="border-0 shadow-lg">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-bold text-gray-900 flex items-center">
-                <FileText className="w-5 h-5 mr-2 text-blue-600" />
-                Total Blog Posts
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-blue-600 mb-2">{pagination.totalCount || 0}</div>
-              <p className="text-sm text-gray-600">Total blog posts</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-bold text-gray-900 flex items-center">
-                <User className="w-5 h-5 mr-2 text-green-600" />
-                Total Visitors
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-green-600 mb-2">1,234</div>
-              <p className="text-sm text-gray-600">+15% dari bulan lalu</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-bold text-gray-900 flex items-center">
-                <Bell className="w-5 h-5 mr-2 text-orange-500" />
-                Notifications
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-orange-500 mb-2">5</div>
-              <p className="text-sm text-gray-600">Pesan baru menunggu</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="border-0 shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-xl font-bold text-gray-900">
-                Recent Activities
-              </CardTitle>
-              <CardDescription>
-                Aktivitas terbaru di website
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-900">Blog post baru dipublikasi</p>
-                    <p className="text-xs text-gray-500">2 jam yang lalu</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-900">Pesan kontak baru diterima</p>
-                    <p className="text-xs text-gray-500">4 jam yang lalu</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-900">Website backup completed</p>
-                    <p className="text-xs text-gray-500">1 hari yang lalu</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-xl font-bold text-gray-900">
-                Quick Actions
-              </CardTitle>
-              <CardDescription>
-                Aksi cepat untuk mengelola website
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <Button 
-                  onClick={() => handleMenuClick('blog')}
-                  className="w-full justify-start bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  <FileText className="w-4 h-4 mr-2" />
-                  Kelola Blog Posts
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                >
-                  <User className="w-4 h-4 mr-2" />
-                  Lihat Pesan Kontak
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                >
-                  <Settings className="w-4 h-4 mr-2" />
-                  Pengaturan Website
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    )
-  }
-
-  const sidebarClasses = `fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-    sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-  }`
+    </div>
+  )
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className={sidebarClasses}>
-        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-          <Link to="/" className="text-xl font-bold text-blue-600">
-            SolusiWeb Admin
+    <div className="min-h-screen bg-gray-50/80">
+      {/* Sidebar */}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-100 transform transition-transform duration-300 ease-out lg:translate-x-0 ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-100">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-blue to-primary-green flex items-center justify-center">
+              <span className="text-white font-heading font-bold text-xs">SW</span>
+            </div>
+            <span className="text-sm font-heading font-bold text-gray-900">SolusiWeb</span>
           </Link>
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="lg:hidden text-gray-500 hover:text-gray-700"
-          >
-            <X size={24} />
+          <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-gray-400 hover:text-gray-600">
+            <X size={20} />
           </button>
         </div>
-        
-        <nav className="mt-6 px-3">
+
+        <nav className="mt-4 px-3">
           <div className="space-y-1">
             {menuItems.map((item) => {
               const Icon = item.icon
               const isActive = activeMenu === item.id
-              const buttonClasses = `w-full flex items-center px-3 py-2 text-sm rounded-lg transition-colors ${
-                isActive
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`
-              
               return (
                 <button
                   key={item.id}
                   onClick={() => handleMenuClick(item.id)}
-                  className={buttonClasses}
+                  className={`w-full flex items-center px-3 py-2.5 text-sm rounded-xl transition-all ${
+                    isActive
+                      ? 'bg-primary-blue text-white shadow-md shadow-primary-blue/20'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
                 >
-                  <Icon className="w-5 h-5 mr-3" />
+                  <Icon className="w-4 h-4 mr-3" />
                   {item.label}
                 </button>
               )
             })}
           </div>
         </nav>
-        
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
-          <div className="flex items-center mb-4">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-green-600 rounded-full flex items-center justify-center">
+
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-blue to-primary-green flex items-center justify-center">
               <User className="w-4 h-4 text-white" />
             </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-900">Admin User</p>
-              <p className="text-xs text-gray-500">admin@solusiweb.com</p>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-gray-900 truncate">Admin User</p>
+              <p className="text-xs text-gray-400 truncate">admin@solusiweb.com</p>
             </div>
           </div>
           <Button
             onClick={handleLogout}
             variant="outline"
             size="sm"
-            className="w-full justify-start text-red-600 border-red-200 hover:bg-red-50"
+            className="w-full justify-start text-red-500 border-red-100 hover:bg-red-50 hover:border-red-200 rounded-xl text-xs"
           >
-            <LogOut className="w-4 h-4 mr-2" />
+            <LogOut className="w-3.5 h-3.5 mr-2" />
             Logout
           </Button>
         </div>
-      </div>
+      </aside>
 
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        ></div>
-      )}
+      {/* Overlay */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
-      <div className="flex-1 lg:ml-64">
-        <header className="fixed top-0 right-0 left-0 lg:left-64 bg-white shadow-sm border-b border-gray-200 z-40">
+      {/* Main Content */}
+      <div className="lg:ml-64">
+        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-100/50">
           <div className="flex items-center justify-between h-16 px-6">
-            <div className="flex items-center">
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden text-gray-500 hover:text-gray-700 mr-4"
+                className="lg:hidden text-gray-500 hover:text-gray-700 p-1"
               >
-                <Menu size={24} />
+                <Menu size={20} />
               </button>
-              <h2 className="text-lg font-semibold text-gray-900 capitalize">
+              <h2 className="text-sm font-heading font-semibold text-gray-900">
                 {activeMenu === 'dashboard' ? 'Dashboard' : menuItems.find(item => item.id === activeMenu)?.label}
               </h2>
             </div>
-            
-            <div className="flex items-center space-x-4">
-              <Link 
+            <div className="flex items-center gap-3">
+              <Link
                 to="/"
-                className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
+                className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-primary-blue transition-colors"
               >
+                <ExternalLink size={14} />
                 Lihat Website
               </Link>
               <div className="relative">
-                <Bell className="w-5 h-5 text-gray-500" />
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full text-xs flex items-center justify-center">
-                  <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
-                </span>
+                <Bell className="w-5 h-5 text-gray-400" />
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
               </div>
             </div>
           </div>
         </header>
 
-        <main className="pt-16 min-h-screen">
-          <div className="p-6">
-            {renderContent()}
-          </div>
+        <main className="p-6 lg:p-8">
+          {activeMenu === 'blog' ? renderBlogList() : renderDashboard()}
         </main>
       </div>
 
-      {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <div className="flex items-center mb-4">
-              <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                <Trash2 className="w-5 h-5 text-red-600" />
+      {/* Delete Modal */}
+      <AnimatePresence>
+        {showDeleteModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center">
+                  <Trash2 className="w-5 h-5 text-red-500" />
+                </div>
+                <div>
+                  <h3 className="text-base font-heading font-bold text-gray-900">Hapus Blog Post</h3>
+                  <p className="text-xs text-gray-500">Tindakan ini tidak dapat dibatalkan</p>
+                </div>
               </div>
-              <div className="ml-4">
-                <h3 className="text-lg font-medium text-gray-900">
-                  Hapus Blog Post
-                </h3>
-                <p className="text-sm text-gray-500">
-                  Tindakan ini tidak dapat dibatalkan
-                </p>
-              </div>
-            </div>
-            
-            <div className="mb-6">
-              <p className="text-gray-700">
-                Apakah Anda yakin ingin menghapus blog post{' '}
+
+              <p className="text-sm text-gray-600 mb-6">
+                Apakah Anda yakin ingin menghapus{' '}
                 <span className="font-semibold">"{blogToDelete?.title}"</span>?
               </p>
-            </div>
-            
-            <div className="flex justify-end space-x-3">
-              <Button
-                variant="outline"
-                onClick={handleDeleteCancel}
-                disabled={isDeleting}
-              >
-                Batal
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={handleDeleteConfirm}
-                disabled={isDeleting}
-                className="bg-red-600 hover:bg-red-700"
-              >
-                {isDeleting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Menghapus...
-                  </>
-                ) : (
-                  'Hapus'
-                )}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={handleDeleteCancel}
+                  disabled={isDeleting}
+                  className="rounded-xl"
+                >
+                  Batal
+                </Button>
+                <Button
+                  onClick={handleDeleteConfirm}
+                  disabled={isDeleting}
+                  className="bg-red-500 hover:bg-red-600 text-white rounded-xl"
+                >
+                  {isDeleting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Menghapus...
+                    </>
+                  ) : (
+                    'Hapus'
+                  )}
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
