@@ -2,15 +2,15 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import { useAuth } from "../hooks/useAuth";
 
-// Login API call
-export const loginUser = async (credentials) => {
-  const response = await api.post("/api/auth/login", credentials);
+// Register API call
+export const registerUser = async (data) => {
+  const response = await api.post("/api/auth/register", data);
   return response.data;
 };
 
-// Logout API call
-export const logoutUser = async () => {
-  const response = await api.post("/auth/logout");
+// Login API call
+export const loginUser = async (credentials) => {
+  const response = await api.post("/api/auth/login", credentials);
   return response.data;
 };
 
@@ -21,10 +21,9 @@ export const useLogin = () => {
 
   return useMutation({
     mutationFn: loginUser,
-    onSuccess: (data) => {
-      // Assuming the API returns { token, user } or similar structure
-      const { token, user, ...userData } = data;
-      login(user || userData, token);
+    onSuccess: (response) => {
+      const { token, user } = response.data;
+      login(user, token);
 
       // Invalidate and refetch any user-related queries
       queryClient.invalidateQueries({ queryKey: ["user"] });
@@ -35,24 +34,15 @@ export const useLogin = () => {
   });
 };
 
-// Custom hook for logout mutation
+// Custom hook for logout — JWT auth means logout is client-side only
 export const useLogout = () => {
   const { logout } = useAuth();
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: logoutUser,
-    onSuccess: () => {
-      logout();
+  const handleLogout = () => {
+    logout();
+    queryClient.clear();
+  };
 
-      // Clear all cached queries
-      queryClient.clear();
-    },
-    onError: (error) => {
-      console.error("Logout failed:", error);
-      // Even if logout fails on server, clear local state
-      logout();
-      queryClient.clear();
-    },
-  });
+  return { logout: handleLogout };
 };

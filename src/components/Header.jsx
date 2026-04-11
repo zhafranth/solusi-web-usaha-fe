@@ -12,7 +12,7 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false)
   const location = useLocation()
   const { isAuthenticated, user } = useAuth()
-  const logoutMutation = useLogout()
+  const { logout: handleLogoutAction } = useLogout()
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20)
@@ -35,7 +35,7 @@ const Header = () => {
   }
 
   const handleLogout = () => {
-    logoutMutation.mutate()
+    handleLogoutAction()
   }
 
   const navItems = [
@@ -111,10 +111,10 @@ const Header = () => {
                     variant="outline"
                     size="sm"
                     className="border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300 rounded-xl"
-                    disabled={logoutMutation.isPending}
+
                   >
                     <LogOut size={14} className="mr-1.5" />
-                    {logoutMutation.isPending ? '...' : 'Logout'}
+                    Logout
                   </Button>
                 </>
               ) : (
@@ -190,10 +190,10 @@ const Header = () => {
                         onClick={() => { handleLogout(); setIsMenuOpen(false); }}
                         variant="outline"
                         className="w-full border-red-200 text-red-500 hover:bg-red-50 rounded-xl"
-                        disabled={logoutMutation.isPending}
+    
                       >
                         <LogOut size={14} className="mr-2" />
-                        {logoutMutation.isPending ? 'Logging out...' : 'Logout'}
+                        Logout
                       </Button>
                     </div>
                   ) : (

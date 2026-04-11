@@ -218,6 +218,53 @@ export const useBlogs = (params = {}) => {
 };
 
 /**
+ * Mengambil blog posts milik user yang sedang login
+ * @param {Object} params - Parameter query
+ * @param {number} [params.page=1] - Halaman yang diminta
+ * @param {number} [params.limit=10] - Jumlah item per halaman
+ * @param {string} [params.status] - Filter status (DRAFT, PUBLISHED)
+ * @returns {Promise<Object>} - Response dengan data blogs dan pagination
+ */
+export const getMyBlogs = async (params = {}) => {
+  try {
+    const queryParams = new URLSearchParams();
+    queryParams.append("page", params.page || 1);
+    queryParams.append("limit", params.limit || 10);
+    if (params.status) queryParams.append("status", params.status);
+
+    const response = await api.get(`/api/blog/user/my?${queryParams.toString()}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching my blogs:", error);
+
+    if (error.response) {
+      const errorMessage = error.response.data?.message || "Gagal mengambil data blog";
+      throw new Error(errorMessage);
+    } else if (error.request) {
+      throw new Error("Tidak dapat terhubung ke server. Periksa koneksi internet Anda.");
+    } else {
+      throw error;
+    }
+  }
+};
+
+/**
+ * Custom hook untuk mengambil blog milik user menggunakan React Query
+ * @param {Object} params - Parameter query
+ * @returns {Object} - Query result dengan data, loading, error states
+ */
+export const useMyBlogs = (params = {}) => {
+  return useQuery({
+    queryKey: ["myBlogs", params],
+    queryFn: () => getMyBlogs(params),
+    staleTime: 2 * 60 * 1000,
+    cacheTime: 5 * 60 * 1000,
+    retry: 2,
+    refetchOnWindowFocus: false,
+  });
+};
+
+/**
  * Membuat blog post dengan status DRAFT
  * @param {Object} blogData - Data blog
  * @returns {Promise<Object>} - Response dari server
