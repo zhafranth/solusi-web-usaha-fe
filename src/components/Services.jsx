@@ -105,39 +105,80 @@ const ServiceCard = ({ service, index }) => {
           className={`absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-0 group-hover:opacity-[0.03] transition-opacity duration-500 rounded-3xl`}
         />
 
-        {/* Top row: icon + arrow */}
-        <div className="flex items-start justify-between mb-6 relative z-10">
-          <div className={`p-3 rounded-2xl ${service.accent} transition-transform duration-300 group-hover:scale-110`}>
-            <Icon size={28} />
-          </div>
-          <motion.div
-            className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:border-primary-blue/30 group-hover:bg-primary-blue/5"
-          >
-            <ArrowUpRight size={16} className="text-primary-blue" />
-          </motion.div>
-        </div>
+        {isLarge ? (
+          /* Large card: horizontal layout to fill the wider space */
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-start gap-6 h-full">
+            {/* Left: icon + text */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between mb-5">
+                <div className={`p-3 rounded-2xl ${service.accent} transition-transform duration-300 group-hover:scale-110`}>
+                  <Icon size={28} />
+                </div>
+                <motion.div className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:border-primary-blue/30 group-hover:bg-primary-blue/5 sm:hidden">
+                  <ArrowUpRight size={16} className="text-primary-blue" />
+                </motion.div>
+              </div>
+              <h3 className="text-xl font-heading font-bold text-gray-900 mb-3 group-hover:text-primary-blue transition-colors">
+                {service.title}
+              </h3>
+              <p className="text-gray-500 text-sm leading-relaxed">
+                {service.description}
+              </p>
+            </div>
 
-        {/* Content */}
-        <div className="relative z-10">
-          <h3 className="text-xl font-heading font-bold text-gray-900 mb-3 group-hover:text-primary-blue transition-colors">
-            {service.title}
-          </h3>
-          <p className="text-gray-500 text-sm leading-relaxed mb-6">
-            {service.description}
-          </p>
-
-          {/* Feature pills */}
-          <div className="flex flex-wrap gap-2">
-            {service.features.map((feature, i) => (
-              <span
-                key={i}
-                className="px-3 py-1.5 text-xs font-medium bg-gray-50 text-gray-600 rounded-full border border-gray-100 group-hover:bg-primary-blue/5 group-hover:text-primary-blue group-hover:border-primary-blue/10 transition-colors"
-              >
-                {feature}
-              </span>
-            ))}
+            {/* Right: features + arrow */}
+            <div className="flex flex-col items-end justify-between sm:h-full sm:min-h-[140px] shrink-0">
+              <motion.div className="w-10 h-10 rounded-full border border-gray-200 items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:border-primary-blue/30 group-hover:bg-primary-blue/5 hidden sm:flex">
+                <ArrowUpRight size={16} className="text-primary-blue" />
+              </motion.div>
+              <div className="flex flex-wrap gap-2 sm:justify-end sm:max-w-[220px]">
+                {service.features.map((feature, i) => (
+                  <span
+                    key={i}
+                    className="px-3 py-1.5 text-xs font-medium bg-gray-50 text-gray-600 rounded-full border border-gray-100 group-hover:bg-primary-blue/5 group-hover:text-primary-blue group-hover:border-primary-blue/10 transition-colors"
+                  >
+                    {feature}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
+        ) : (
+          /* Small card: compact vertical layout */
+          <>
+            {/* Top row: icon + arrow */}
+            <div className="flex items-start justify-between mb-5 relative z-10">
+              <div className={`p-3 rounded-2xl ${service.accent} transition-transform duration-300 group-hover:scale-110`}>
+                <Icon size={28} />
+              </div>
+              <motion.div className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:border-primary-blue/30 group-hover:bg-primary-blue/5">
+                <ArrowUpRight size={16} className="text-primary-blue" />
+              </motion.div>
+            </div>
+
+            {/* Content */}
+            <div className="relative z-10">
+              <h3 className="text-xl font-heading font-bold text-gray-900 mb-2 group-hover:text-primary-blue transition-colors">
+                {service.title}
+              </h3>
+              <p className="text-gray-500 text-sm leading-relaxed mb-5">
+                {service.description}
+              </p>
+
+              {/* Feature pills */}
+              <div className="flex flex-wrap gap-2">
+                {service.features.map((feature, i) => (
+                  <span
+                    key={i}
+                    className="px-3 py-1.5 text-xs font-medium bg-gray-50 text-gray-600 rounded-full border border-gray-100 group-hover:bg-primary-blue/5 group-hover:text-primary-blue group-hover:border-primary-blue/10 transition-colors"
+                  >
+                    {feature}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Bottom gradient line */}
         <div
