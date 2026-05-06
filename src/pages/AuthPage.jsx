@@ -114,8 +114,12 @@ const AuthPage = () => {
         >
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-primary-blue to-primary-green flex items-center justify-center shadow-lg shadow-primary-blue/20">
-              <span className="text-white font-heading font-bold text-lg">SW</span>
+            <div className="w-14 h-14 mx-auto mb-4 rounded-2xl overflow-hidden flex items-center justify-center shadow-lg shadow-primary-blue/20">
+              <img
+                src="/luminara-logo.jpeg"
+                alt="Luminara Codex"
+                className="w-full h-full object-cover"
+              />
             </div>
             <h1 className="text-2xl font-heading font-bold text-gray-900 mb-1">
               Masuk ke Dashboard
@@ -147,7 +151,7 @@ const AuthPage = () => {
                         {...field}
                         type="email"
                         className={inputClasses(errors.email)}
-                        placeholder="admin@solusiweb.com"
+                        placeholder="admin@luminaracodex.com"
                       />
                     </div>
                     {errors.email && (
@@ -252,7 +256,7 @@ const AuthPage = () => {
           transition={{ delay: 0.4 }}
           className="mt-8 text-center text-gray-600 text-xs"
         >
-          &copy; {new Date().getFullYear()} Solusi Web Usaha. Semua hak dilindungi.
+          &copy; {new Date().getFullYear()} Luminara Codex. Semua hak dilindungi.
         </motion.p>
       </div>
     </div>

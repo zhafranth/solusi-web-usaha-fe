@@ -26,7 +26,7 @@ const Contact = () => {
 
   const contactInfo = [
     { icon: Phone, title: "Telepon", content: "+62 812-3456-7890", description: "Senin - Jumat, 09:00 - 18:00" },
-    { icon: Mail, title: "Email", content: "info@solusiwebusaha.com", description: "Respon dalam 24 jam" },
+    { icon: Mail, title: "Email", content: "info@luminaracodex.com", description: "Respon dalam 24 jam" },
     { icon: MapPin, title: "Alamat", content: "Jakarta, Indonesia", description: "Konsultasi online tersedia" },
     { icon: Clock, title: "Jam Operasional", content: "09:00 - 18:00 WIB", description: "Senin - Jumat" },
   ]

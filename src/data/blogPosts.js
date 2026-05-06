@@ -5,7 +5,7 @@ export const blogPosts = [
     title: "5 Tren Website Design 2024 yang Wajib Diketahui UMKM",
     excerpt: "Pelajari tren desain website terbaru yang dapat meningkatkan konversi dan user experience untuk bisnis UMKM Anda.",
     content: "Website design terus berkembang seiring dengan perubahan teknologi dan perilaku pengguna. Tahun 2024 membawa beberapa tren menarik yang dapat membantu UMKM meningkatkan performa online mereka...",
-    author: "Tim SolusiWeb",
+    author: "Tim Luminara Codex",
     publishedAt: "2024-01-15",
     category: "Design",
     tags: ["web design", "UMKM", "tren 2024", "UI/UX"],

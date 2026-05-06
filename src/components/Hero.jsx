@@ -131,7 +131,7 @@ const Hero = () => {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="border-white/30 text-white hover:bg-white/10 hover:border-white/50 text-base px-8 py-5 rounded-2xl backdrop-blur-sm transition-all"
+                  className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:border-white/50 hover:text-white text-base px-8 py-5 rounded-2xl backdrop-blur-sm transition-all"
                 >
                   Lihat Portfolio
                 </Button>

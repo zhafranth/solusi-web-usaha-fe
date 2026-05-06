@@ -316,7 +316,7 @@ const DashboardPage = () => {
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-heading font-bold text-gray-900">Dashboard</h1>
-        <p className="text-sm text-gray-500 mt-1">Selamat datang di panel admin SolusiWeb Usaha</p>
+        <p className="text-sm text-gray-500 mt-1">Selamat datang di panel admin Luminara Codex</p>
       </div>
 
       {/* Stats */}
@@ -406,10 +406,14 @@ const DashboardPage = () => {
       }`}>
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-100">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-blue to-primary-green flex items-center justify-center">
-              <span className="text-white font-heading font-bold text-xs">SW</span>
+            <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
+              <img
+                src="/luminara-logo.jpeg"
+                alt="Luminara Codex"
+                className="w-full h-full object-cover"
+              />
             </div>
-            <span className="text-sm font-heading font-bold text-gray-900">SolusiWeb</span>
+            <span className="text-sm font-heading font-bold text-gray-900">Luminara Codex</span>
           </Link>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-gray-400 hover:text-gray-600">
             <X size={20} />
@@ -446,7 +450,7 @@ const DashboardPage = () => {
             </div>
             <div className="min-w-0">
               <p className="text-sm font-medium text-gray-900 truncate">Admin User</p>
-              <p className="text-xs text-gray-400 truncate">admin@solusiweb.com</p>
+              <p className="text-xs text-gray-400 truncate">admin@luminaracodex.com</p>
             </div>
           </div>
           <Button

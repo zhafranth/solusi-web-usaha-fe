@@ -64,11 +64,15 @@ const Header = () => {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2 group">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-blue to-primary-green flex items-center justify-center transform group-hover:scale-105 transition-transform duration-300">
-                <span className="text-white font-heading font-bold text-sm">SW</span>
+              <div className="w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center transform group-hover:scale-105 transition-transform duration-300">
+                <img
+                  src="/luminara-logo.jpeg"
+                  alt="Luminara Codex"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <span className="text-lg font-heading font-bold text-gray-900 group-hover:text-primary-blue transition-colors">
-                SolusiWeb
+                Luminara Codex
               </span>
             </Link>
 

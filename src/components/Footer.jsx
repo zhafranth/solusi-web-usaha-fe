@@ -45,10 +45,14 @@ const Footer = () => {
           {/* Company Info */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-2 mb-6">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-blue to-primary-green flex items-center justify-center">
-                <span className="text-white font-heading font-bold text-sm">SW</span>
+              <div className="w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center">
+                <img
+                  src="/luminara-logo.jpeg"
+                  alt="Luminara Codex"
+                  className="w-full h-full object-cover"
+                />
               </div>
-              <span className="text-lg font-heading font-bold">SolusiWeb</span>
+              <span className="text-lg font-heading font-bold">Luminara Codex</span>
             </div>
             <p className="text-gray-400 text-sm mb-6 leading-relaxed">
               Membantu UMKM dan perusahaan dalam transformasi digital dengan solusi web yang profesional dan inovatif.
@@ -61,7 +65,7 @@ const Footer = () => {
               </div>
               <div className="flex items-center gap-3 text-gray-400 text-sm group">
                 <Mail size={14} className="text-primary-green flex-shrink-0" />
-                <span className="group-hover:text-white transition-colors">info@solusiwebusaha.com</span>
+                <span className="group-hover:text-white transition-colors">info@luminaracodex.com</span>
               </div>
               <div className="flex items-center gap-3 text-gray-400 text-sm group">
                 <MapPin size={14} className="text-primary-green flex-shrink-0" />
@@ -149,7 +153,7 @@ const Footer = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-gray-500 text-sm">
-              &copy; {currentYear} SolusiWeb Usaha. All rights reserved.
+              &copy; {currentYear} Luminara Codex. All rights reserved.
             </div>
             <div className="flex gap-6">
               {["Privacy Policy", "Terms of Service", "Sitemap"].map((item) => (
