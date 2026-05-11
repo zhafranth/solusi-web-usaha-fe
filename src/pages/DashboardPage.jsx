@@ -8,7 +8,6 @@ import {
   X,
   LogOut,
   User,
-  Settings,
   Bell,
   Search,
   Filter,
@@ -19,15 +18,22 @@ import {
   Loader2,
   Plus,
   TrendingUp,
-  MessageSquare,
   ExternalLink,
+  Clock,
+  Tag,
+  Mail,
+  Image as ImageIcon,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '../components/ui/button'
 import { useBlogs, deleteBlog } from '../services/blogService'
+import { useMessages } from '../services/contactService'
 
 const DashboardPage = () => {
-  const { logout } = useAuth()
+  const { user, logout } = useAuth()
+  const userName = user?.nama || 'Pengguna'
+  const userEmail = user?.email || ''
+  const userInitial = (user?.nama?.trim()?.[0] || 'A').toUpperCase()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -78,6 +84,14 @@ const DashboardPage = () => {
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'blog', label: 'Blog Posts', icon: FileText },
   ]
+
+  const isAdmin = user?.role === 'ADMIN'
+
+  const { data: unreadMessagesData } = useMessages(
+    { page: 1, limit: 1, isRead: false },
+    { enabled: isAdmin },
+  )
+  const unreadCount = unreadMessagesData?.data?.pagination?.totalCount || 0
 
   const handleMenuClick = (menuId) => {
     setActiveMenu(menuId)
@@ -258,7 +272,12 @@ const DashboardPage = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 flex-shrink-0">
-                    <button className="p-2 rounded-lg text-gray-400 hover:text-primary-blue hover:bg-primary-blue/5 transition-all">
+                    <button
+                      onClick={() => post.status === 'PUBLISHED' && window.open(`/blog/${post.id}`, '_blank')}
+                      disabled={post.status !== 'PUBLISHED'}
+                      title={post.status === 'PUBLISHED' ? 'Lihat artikel publik' : 'Draft tidak bisa di-preview public'}
+                      className="p-2 rounded-lg text-gray-400 hover:text-primary-blue hover:bg-primary-blue/5 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:text-gray-400 disabled:hover:bg-transparent"
+                    >
                       <Eye className="w-4 h-4" />
                     </button>
                     <button
@@ -322,9 +341,9 @@ const DashboardPage = () => {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
-          { label: "Total Blog Posts", value: pagination.totalCount || 0, icon: FileText, color: "from-primary-blue to-blue-400", change: null },
-          { label: "Total Visitors", value: "1,234", icon: TrendingUp, color: "from-primary-green to-emerald-400", change: "+15%" },
-          { label: "Notifications", value: "5", icon: Bell, color: "from-amber-500 to-orange-400", change: null },
+          { label: "Total Blog Posts", value: pagination.totalCount || 0, icon: FileText, color: "from-primary-blue to-blue-400", placeholder: false },
+          { label: "Total Visitors", value: "Coming soon", icon: TrendingUp, color: "from-gray-300 to-gray-200", placeholder: true },
+          { label: "Notifications", value: "Coming soon", icon: Bell, color: "from-gray-300 to-gray-200", placeholder: true },
         ].map((stat, i) => {
           const Icon = stat.icon
           return (
@@ -339,13 +358,12 @@ const DashboardPage = () => {
                 <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-sm`}>
                   <Icon className="w-5 h-5 text-white" />
                 </div>
-                {stat.change && (
-                  <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
-                    {stat.change}
-                  </span>
+                {stat.placeholder && (
+                  <Clock className="w-4 h-4 text-gray-300" />
                 )}
               </div>
-              <div className="text-2xl font-heading font-bold text-gray-900 mb-0.5">{stat.value}</div>
+              {/* TODO(T-XXX): wire to real analytics endpoint */}
+              <div className={`text-2xl font-heading font-bold mb-0.5 ${stat.placeholder ? 'text-gray-300 text-base font-medium' : 'text-gray-900'}`}>{stat.value}</div>
               <p className="text-xs text-gray-400">{stat.label}</p>
             </motion.div>
           )
@@ -356,20 +374,10 @@ const DashboardPage = () => {
         {/* Recent Activities */}
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
           <h3 className="text-sm font-heading font-bold text-gray-900 mb-4">Recent Activities</h3>
-          <div className="space-y-4">
-            {[
-              { text: "Blog post baru dipublikasi", time: "2 jam lalu", color: "bg-primary-blue" },
-              { text: "Pesan kontak baru diterima", time: "4 jam lalu", color: "bg-primary-green" },
-              { text: "Website backup completed", time: "1 hari lalu", color: "bg-amber-500" },
-            ].map((activity, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <div className={`w-2 h-2 rounded-full ${activity.color} flex-shrink-0`} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-700 truncate">{activity.text}</p>
-                  <p className="text-xs text-gray-400">{activity.time}</p>
-                </div>
-              </div>
-            ))}
+          {/* TODO(T-XXX): wire to real activities endpoint */}
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <Clock className="w-8 h-8 text-gray-300 mb-2" />
+            <p className="text-sm text-gray-400">Belum ada aktivitas tercatat</p>
           </div>
         </div>
 
@@ -384,14 +392,12 @@ const DashboardPage = () => {
               <FileText className="w-4 h-4 mr-2" />
               Kelola Blog Posts
             </Button>
-            <Button variant="outline" className="w-full justify-start rounded-xl">
-              <MessageSquare className="w-4 h-4 mr-2" />
-              Lihat Pesan Kontak
-            </Button>
-            <Button variant="outline" className="w-full justify-start rounded-xl">
-              <Settings className="w-4 h-4 mr-2" />
-              Pengaturan Website
-            </Button>
+            <Link to="/dashboard/add-post">
+              <Button variant="outline" className="w-full justify-start rounded-xl">
+                <Plus className="w-4 h-4 mr-2" />
+                Tambah Blog Post
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
@@ -440,17 +446,50 @@ const DashboardPage = () => {
                 </button>
               )
             })}
+            <Link
+              to="/dashboard/media"
+              onClick={() => setSidebarOpen(false)}
+              className="w-full flex items-center px-3 py-2.5 text-sm rounded-xl transition-all text-gray-600 hover:bg-gray-50"
+            >
+              <ImageIcon className="w-4 h-4 mr-3" />
+              Media
+            </Link>
+            {isAdmin && (
+              <>
+                <Link
+                  to="/dashboard/messages"
+                  onClick={() => setSidebarOpen(false)}
+                  className="w-full flex items-center px-3 py-2.5 text-sm rounded-xl transition-all text-gray-600 hover:bg-gray-50"
+                >
+                  <Mail className="w-4 h-4 mr-3" />
+                  <span className="flex-1 text-left">Pesan Kontak</span>
+                  {unreadCount > 0 && (
+                    <span className="ml-2 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] font-semibold rounded-full bg-primary-blue text-white">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
+                </Link>
+                <Link
+                  to="/dashboard/categories"
+                  onClick={() => setSidebarOpen(false)}
+                  className="w-full flex items-center px-3 py-2.5 text-sm rounded-xl transition-all text-gray-600 hover:bg-gray-50"
+                >
+                  <Tag className="w-4 h-4 mr-3" />
+                  Kategori
+                </Link>
+              </>
+            )}
           </div>
         </nav>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-blue to-primary-green flex items-center justify-center">
-              <User className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 rounded-lg bg-primary-blue/10 text-primary-blue flex items-center justify-center text-xs font-semibold">
+              {userInitial}
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">Admin User</p>
-              <p className="text-xs text-gray-400 truncate">admin@luminaracodex.com</p>
+              <p className="text-sm font-medium text-gray-900 truncate">{userName}</p>
+              {userEmail && <p className="text-xs text-gray-400 truncate">{userEmail}</p>}
             </div>
           </div>
           <Button
@@ -501,10 +540,24 @@ const DashboardPage = () => {
                 <ExternalLink size={14} />
                 Lihat Website
               </Link>
-              <div className="relative">
-                <Bell className="w-5 h-5 text-gray-400" />
-                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
-              </div>
+              {isAdmin ? (
+                <Link
+                  to="/dashboard/messages"
+                  className="relative text-gray-400 hover:text-primary-blue transition-colors"
+                  aria-label={`Pesan kontak${unreadCount > 0 ? ` (${unreadCount} belum dibaca)` : ''}`}
+                >
+                  <Bell className="w-5 h-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 inline-flex items-center justify-center min-w-[16px] h-4 px-1 text-[10px] font-semibold rounded-full bg-red-500 text-white">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </Link>
+              ) : (
+                <div className="relative">
+                  <Bell className="w-5 h-5 text-gray-400" />
+                </div>
+              )}
             </div>
           </div>
         </header>

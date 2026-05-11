@@ -151,7 +151,7 @@ const AuthPage = () => {
                         {...field}
                         type="email"
                         className={inputClasses(errors.email)}
-                        placeholder="admin@luminaracodex.com"
+                        placeholder="email@domain.com"
                       />
                     </div>
                     {errors.email && (

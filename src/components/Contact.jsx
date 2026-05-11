@@ -1,27 +1,69 @@
 import { Button } from "./ui/button"
-import { Mail, Phone, MapPin, Clock, Send, ArrowRight } from "lucide-react"
-import { useState } from "react"
-import { motion } from "framer-motion"
+import { Mail, Phone, MapPin, Clock, Send, ArrowRight, Loader2, CheckCircle2 } from "lucide-react"
+import { useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { useForm } from "react-hook-form"
+import { yupResolver } from "@hookform/resolvers/yup"
+import * as yup from "yup"
+import { submitContact } from "../services/contactService"
+
+const contactSchema = yup.object().shape({
+  name: yup
+    .string()
+    .trim()
+    .required("Nama wajib diisi")
+    .min(2, "Nama minimal 2 karakter")
+    .max(100, "Nama maksimal 100 karakter"),
+  email: yup
+    .string()
+    .trim()
+    .required("Email wajib diisi")
+    .email("Format email tidak valid")
+    .max(255, "Email maksimal 255 karakter"),
+  subject: yup
+    .string()
+    .trim()
+    .required("Subjek wajib diisi")
+    .min(5, "Subjek minimal 5 karakter")
+    .max(200, "Subjek maksimal 200 karakter"),
+  message: yup
+    .string()
+    .trim()
+    .required("Pesan wajib diisi")
+    .min(10, "Pesan minimal 10 karakter")
+    .max(2000, "Pesan maksimal 2000 karakter"),
+})
+
+const defaultValues = { name: "", email: "", subject: "", message: "" }
 
 const Contact = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    subject: '',
-    message: ''
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setError,
+    clearErrors,
+    formState: { errors, isSubmitting, isSubmitSuccessful },
+  } = useForm({
+    resolver: yupResolver(contactSchema),
+    defaultValues,
+    mode: "onTouched",
   })
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
+  useEffect(() => {
+    if (!isSubmitSuccessful) return
+    const timer = setTimeout(() => reset(defaultValues, { keepIsSubmitted: false }), 5000)
+    return () => clearTimeout(timer)
+  }, [isSubmitSuccessful, reset])
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log('Form submitted:', formData)
-    alert('Terima kasih! Pesan Anda telah terkirim. Tim kami akan segera menghubungi Anda.')
-    setFormData({ name: '', email: '', phone: '', subject: '', message: '' })
+  const onSubmit = async (data) => {
+    clearErrors("root")
+    try {
+      await submitContact(data)
+      reset(defaultValues, { keepIsSubmitted: true })
+    } catch (error) {
+      setError("root", { type: "server", message: error.message || "Gagal mengirim pesan" })
+    }
   }
 
   const contactInfo = [
@@ -31,7 +73,11 @@ const Contact = () => {
     { icon: Clock, title: "Jam Operasional", content: "09:00 - 18:00 WIB", description: "Senin - Jumat" },
   ]
 
-  const inputClasses = "w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-blue/20 focus:border-primary-blue focus:bg-white font-body text-sm transition-all outline-none"
+  const baseInputClasses = "w-full px-4 py-3.5 bg-gray-50 border rounded-xl focus:ring-2 focus:ring-primary-blue/20 focus:border-primary-blue focus:bg-white font-body text-sm transition-all outline-none"
+  const inputClass = (hasError) => `${baseInputClasses} ${hasError ? "border-red-300 focus:ring-red-200 focus:border-red-400" : "border-gray-200"}`
+
+  const rootError = errors.root?.message
+  const showSuccess = isSubmitSuccessful && !rootError
 
   return (
     <section id="contact" className="py-24 bg-gray-50/50 relative overflow-hidden">
@@ -39,7 +85,6 @@ const Contact = () => {
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -60,7 +105,6 @@ const Contact = () => {
         </motion.div>
 
         <div className="grid lg:grid-cols-5 gap-12">
-          {/* Contact Info */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -95,7 +139,6 @@ const Contact = () => {
               )
             })}
 
-            {/* CTA Card */}
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -122,7 +165,6 @@ const Contact = () => {
             </motion.div>
           </motion.div>
 
-          {/* Contact Form */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -134,7 +176,37 @@ const Contact = () => {
               <h3 className="text-xl font-heading font-bold text-gray-900 mb-8">
                 Kirim Pesan
               </h3>
-              <form onSubmit={handleSubmit} className="space-y-5">
+
+              <AnimatePresence>
+                {showSuccess && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    className="mb-5 flex items-start gap-3 px-4 py-3 bg-primary-green/5 border border-primary-green/20 rounded-xl"
+                  >
+                    <CheckCircle2 className="w-5 h-5 text-primary-green flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold text-primary-green">Pesan terkirim</p>
+                      <p className="text-xs text-gray-600">
+                        Terima kasih! Tim kami akan segera menghubungi Anda.
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+                {rootError && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    className="mb-5 px-4 py-3 bg-red-50 border border-red-100 rounded-xl"
+                  >
+                    <p className="text-sm text-red-600">{rootError}</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
                 <div className="grid md:grid-cols-2 gap-5">
                   <div>
                     <label htmlFor="name" className="block text-xs font-medium text-gray-600 mb-2 uppercase tracking-wider">
@@ -143,13 +215,11 @@ const Contact = () => {
                     <input
                       type="text"
                       id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      required
-                      className={inputClasses}
+                      {...register("name")}
+                      className={inputClass(!!errors.name)}
                       placeholder="Masukkan nama lengkap"
                     />
+                    {errors.name && <p className="mt-1.5 text-xs text-red-500">{errors.name.message}</p>}
                   </div>
                   <div>
                     <label htmlFor="email" className="block text-xs font-medium text-gray-600 mb-2 uppercase tracking-wider">
@@ -158,52 +228,26 @@ const Contact = () => {
                     <input
                       type="email"
                       id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                      className={inputClasses}
+                      {...register("email")}
+                      className={inputClass(!!errors.email)}
                       placeholder="nama@email.com"
                     />
+                    {errors.email && <p className="mt-1.5 text-xs text-red-500">{errors.email.message}</p>}
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-5">
-                  <div>
-                    <label htmlFor="phone" className="block text-xs font-medium text-gray-600 mb-2 uppercase tracking-wider">
-                      Nomor Telepon
-                    </label>
-                    <input
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      className={inputClasses}
-                      placeholder="08xx-xxxx-xxxx"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="subject" className="block text-xs font-medium text-gray-600 mb-2 uppercase tracking-wider">
-                      Subjek *
-                    </label>
-                    <select
-                      id="subject"
-                      name="subject"
-                      value={formData.subject}
-                      onChange={handleInputChange}
-                      required
-                      className={inputClasses}
-                    >
-                      <option value="">Pilih subjek</option>
-                      <option value="website-company">Website Company Profile</option>
-                      <option value="ecommerce">E-Commerce</option>
-                      <option value="web-app">Web Application</option>
-                      <option value="seo">SEO Optimization</option>
-                      <option value="maintenance">Maintenance & Support</option>
-                      <option value="other">Lainnya</option>
-                    </select>
-                  </div>
+                <div>
+                  <label htmlFor="subject" className="block text-xs font-medium text-gray-600 mb-2 uppercase tracking-wider">
+                    Subjek *
+                  </label>
+                  <input
+                    type="text"
+                    id="subject"
+                    {...register("subject")}
+                    className={inputClass(!!errors.subject)}
+                    placeholder="Singkat tentang topik pesan Anda"
+                  />
+                  {errors.subject && <p className="mt-1.5 text-xs text-red-500">{errors.subject.message}</p>}
                 </div>
 
                 <div>
@@ -212,23 +256,31 @@ const Contact = () => {
                   </label>
                   <textarea
                     id="message"
-                    name="message"
-                    value={formData.message}
-                    onChange={handleInputChange}
-                    required
                     rows={5}
-                    className={`${inputClasses} resize-none`}
+                    {...register("message")}
+                    className={`${inputClass(!!errors.message)} resize-none`}
                     placeholder="Ceritakan tentang proyek yang Anda inginkan..."
                   />
+                  {errors.message && <p className="mt-1.5 text-xs text-red-500">{errors.message.message}</p>}
                 </div>
 
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full bg-primary-blue hover:bg-primary-blue/90 text-white py-4 rounded-xl shadow-md shadow-primary-blue/20 group transition-all"
+                  disabled={isSubmitting}
+                  className="w-full bg-primary-blue hover:bg-primary-blue/90 text-white py-4 rounded-xl shadow-md shadow-primary-blue/20 group transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  <Send className="mr-2 group-hover:rotate-12 transition-transform" size={18} />
-                  Kirim Pesan
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 animate-spin" size={18} />
+                      Mengirim...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="mr-2 group-hover:rotate-12 transition-transform" size={18} />
+                      Kirim Pesan
+                    </>
+                  )}
                 </Button>
               </form>
             </div>

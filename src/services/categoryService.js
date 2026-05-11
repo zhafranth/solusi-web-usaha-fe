@@ -1,5 +1,5 @@
 import { api } from "../lib/api";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 /**
  * Mengambil semua kategori dari server
@@ -102,5 +102,29 @@ export const useCategories = () => {
     cacheTime: 10 * 60 * 1000, // 10 menit
     retry: 2,
     refetchOnWindowFocus: false,
+  });
+};
+
+export const useCreateCategory = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: createCategory,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["categories"] }),
+  });
+};
+
+export const useUpdateCategory = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }) => updateCategory(id, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["categories"] }),
+  });
+};
+
+export const useDeleteCategory = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: deleteCategory,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["categories"] }),
   });
 };

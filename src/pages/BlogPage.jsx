@@ -1,6 +1,5 @@
 import { Button } from "../components/ui/button";
 import {
-  Calendar,
   User,
   Search,
   ArrowLeft,
@@ -185,62 +184,6 @@ const BlogPage = () => {
           </div>
         </motion.div>
 
-        {/* Featured Posts */}
-        {searchTerm === "" && selectedCategoryId === "" && blogs.filter(p => p.featured).length > 0 && (
-          <div className="mb-16">
-            <h2 className="text-2xl font-heading font-bold text-gray-900 mb-8">
-              Artikel Unggulan
-            </h2>
-            <div className="grid lg:grid-cols-3 gap-6">
-              {blogs
-                .filter((post) => post.featured)
-                .slice(0, 3)
-                .map((post, i) => (
-                  <motion.div
-                    key={post.id}
-                    custom={i}
-                    initial="hidden"
-                    animate="visible"
-                    variants={cardVariants}
-                    className="group"
-                  >
-                    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-glass-lg hover:border-gray-200/50 hover:-translate-y-1 transition-all duration-500 flex flex-col h-full">
-                      <div className="relative overflow-hidden">
-                        <div className="w-full h-48 bg-gradient-to-br from-primary-blue to-primary-green flex items-center justify-center">
-                          <span className="text-white/60 font-heading text-sm">Featured</span>
-                        </div>
-                        <div className="absolute top-3 left-3">
-                          <span className="bg-primary-green text-white px-3 py-1 rounded-lg text-xs font-medium">
-                            {post.category?.name || post.category}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="p-6 flex flex-col flex-grow">
-                        <h3 className="text-lg font-heading font-bold text-gray-900 group-hover:text-primary-blue transition-colors line-clamp-2 mb-2">
-                          {post.title}
-                        </h3>
-                        <p className="text-gray-500 text-sm line-clamp-2 mb-4">
-                          {post.excerpt}
-                        </p>
-                        <div className="flex items-center justify-between text-xs text-gray-400 mt-auto">
-                          <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-1">
-                              <Calendar size={12} />
-                              <span>{formatDate(post.publishedAt || post.createdAt)}</span>
-                            </div>
-                          </div>
-                          <span className="text-primary-blue font-medium text-xs group-hover:underline">
-                            Baca
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-            </div>
-          </div>
-        )}
-
         {/* All Posts */}
         <div className="mb-12">
           <div className="flex items-center justify-between mb-8">
@@ -288,64 +231,62 @@ const BlogPage = () => {
                   variants={cardVariants}
                   className="group"
                 >
-                  <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-glass-lg hover:border-gray-200/50 hover:-translate-y-1 transition-all duration-500 flex flex-col h-full">
-                    <div className="relative overflow-hidden">
-                      {post.featuredImage ? (
-                        <img
-                          src={post.featuredImage}
-                          alt={post.title}
-                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-700"
-                        />
-                      ) : (
-                        <img
-                          src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=1920&auto=format&fit=crop"
-                          alt="Blog"
-                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-700"
-                        />
-                      )}
-                      <div className="absolute top-3 left-3">
-                        <span className="bg-white/90 backdrop-blur-sm text-primary-blue px-3 py-1 rounded-lg text-xs font-medium border border-white/50">
-                          {post.category?.name}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="p-6 flex flex-col flex-grow">
-                      <h3 className="text-lg font-heading font-bold text-gray-900 group-hover:text-primary-blue transition-colors line-clamp-2 mb-2">
-                        {post.title}
-                      </h3>
-                      <p className="text-gray-500 text-sm line-clamp-2 mb-4">
-                        {post.excerpt}
-                      </p>
-
-                      {/* Tags */}
-                      <div className="flex flex-wrap gap-1.5 mb-4">
-                        {post.tags && post.tags.length > 0 ? (
-                          post.tags.slice(0, 3).map((tag, idx) => (
-                            <span
-                              key={idx}
-                              className="bg-gray-50 text-gray-500 px-2.5 py-1 rounded-lg text-xs border border-gray-100"
-                            >
-                              #{tag}
-                            </span>
-                          ))
+                  <Link to={`/blog/${post.id}`} className="block h-full">
+                    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-glass-lg hover:border-gray-200/50 hover:-translate-y-1 transition-all duration-500 flex flex-col h-full">
+                      <div className="relative overflow-hidden">
+                        {post.featuredImage ? (
+                          <img
+                            src={post.featuredImage}
+                            alt={post.title}
+                            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-700"
+                          />
                         ) : (
-                          <div className="h-6" />
+                          <div className="w-full h-48 bg-gradient-to-br from-primary-blue to-primary-green" />
                         )}
-                      </div>
-
-                      <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50">
-                        <div className="flex items-center gap-2 text-xs text-gray-400">
-                          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-blue to-primary-green flex items-center justify-center">
-                            <User size={10} className="text-white" />
-                          </div>
-                          <span>{post.author?.nama}</span>
-                          <span className="text-gray-300">|</span>
-                          <span>{formatDate(post.createdAt)}</span>
+                        <div className="absolute top-3 left-3">
+                          <span className="bg-white/90 backdrop-blur-sm text-primary-blue px-3 py-1 rounded-lg text-xs font-medium border border-white/50">
+                            {post.category?.name}
+                          </span>
                         </div>
-                        <ArrowRight size={14} className="text-gray-300 group-hover:text-primary-blue group-hover:translate-x-1 transition-all" />
+                      </div>
+                      <div className="p-6 flex flex-col flex-grow">
+                        <h3 className="text-lg font-heading font-bold text-gray-900 group-hover:text-primary-blue transition-colors line-clamp-2 mb-2">
+                          {post.title}
+                        </h3>
+                        <p className="text-gray-500 text-sm line-clamp-2 mb-4">
+                          {post.excerpt}
+                        </p>
+
+                        {/* Tags */}
+                        <div className="flex flex-wrap gap-1.5 mb-4">
+                          {post.tags && post.tags.length > 0 ? (
+                            post.tags.slice(0, 3).map((tag, idx) => (
+                              <span
+                                key={idx}
+                                className="bg-gray-50 text-gray-500 px-2.5 py-1 rounded-lg text-xs border border-gray-100"
+                              >
+                                #{tag}
+                              </span>
+                            ))
+                          ) : (
+                            <div className="h-6" />
+                          )}
+                        </div>
+
+                        <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50">
+                          <div className="flex items-center gap-2 text-xs text-gray-400">
+                            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-blue to-primary-green flex items-center justify-center">
+                              <User size={10} className="text-white" />
+                            </div>
+                            <span>{post.author?.nama}</span>
+                            <span className="text-gray-300">|</span>
+                            <span>{formatDate(post.createdAt)}</span>
+                          </div>
+                          <ArrowRight size={14} className="text-gray-300 group-hover:text-primary-blue group-hover:translate-x-1 transition-all" />
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 </motion.div>
               ))}
             </div>

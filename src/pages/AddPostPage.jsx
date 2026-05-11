@@ -2,27 +2,20 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import { ArrowLeft, Save, Eye, Upload, X, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "../components/ui/button";
 import RichTextEditor from "../components/RichTextEditor";
+import TagsInput from "../components/TagsInput";
+import { blogSchema, blogDefaults } from "../schemas/blog.schema";
 import { uploadFeaturedImage } from "../services/uploadService";
 import { useCategories } from "../services/categoryService";
 import { saveDraft, publishBlog } from "../services/blogService";
-
-const schema = yup.object().shape({
-  title: yup.string().required("Judul wajib diisi").min(5, "Judul minimal 5 karakter"),
-  excerpt: yup.string().required("Excerpt wajib diisi").min(10, "Excerpt minimal 10 karakter"),
-  content: yup.string().required("Konten wajib diisi").min(50, "Konten minimal 50 karakter"),
-  category: yup.string().required("Kategori wajib dipilih"),
-  tags: yup.string().optional(),
-  featured: yup.boolean().default(false),
-  image: yup.string().required("Gambar utama wajib diupload"),
-});
+import { useAuth } from "../hooks/useAuth";
 
 const AddPostPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const {
     data: categories = [],
     isLoading: isCategoriesLoading,
@@ -36,16 +29,8 @@ const AddPostPage = () => {
     setValue,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(schema),
-    defaultValues: {
-      title: "",
-      excerpt: "",
-      content: "",
-      category: "",
-      tags: "",
-      featured: false,
-      image: "",
-    },
+    resolver: yupResolver(blogSchema),
+    defaultValues: blogDefaults,
     mode: "onChange",
   });
 
@@ -86,9 +71,7 @@ const AddPostPage = () => {
         content: data.content.trim(),
         categoryId: parseInt(data.category),
         featuredImage: data.image || undefined,
-        tags: data.tags
-          ? data.tags.split(",").map((tag) => tag.trim()).filter((tag) => tag)
-          : undefined,
+        tags: data.tags && data.tags.length > 0 ? data.tags : undefined,
       };
 
       if (isDraft) {
@@ -146,7 +129,7 @@ const AddPostPage = () => {
           </p>
 
           <div className="flex items-center gap-3 text-sm text-gray-400 mb-8 pb-8 border-b border-gray-100">
-            <span>By Admin User</span>
+            <span>By {user?.nama || 'Penulis'}</span>
             <span className="text-gray-300">|</span>
             <span>{new Date().toLocaleDateString("id-ID")}</span>
             <span className="text-gray-300">|</span>
@@ -168,13 +151,13 @@ const AddPostPage = () => {
             }}
           />
 
-          {watchedValues.tags && (
+          {watchedValues.tags && watchedValues.tags.length > 0 && (
             <div className="mt-8 pt-6 border-t border-gray-100">
               <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Tags</p>
               <div className="flex flex-wrap gap-2">
-                {watchedValues.tags.split(",").map((tag, index) => (
+                {watchedValues.tags.map((tag, index) => (
                   <span key={index} className="bg-gray-50 text-gray-600 px-3 py-1.5 rounded-lg text-sm border border-gray-100">
-                    {tag.trim()}
+                    {tag}
                   </span>
                 ))}
               </div>
@@ -460,46 +443,12 @@ const AddPostPage = () => {
                 <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
                   Tags
                 </label>
-                <p className="text-xs text-gray-400 mb-2">Pisahkan dengan koma (,)</p>
+                <p className="text-xs text-gray-400 mb-2">Tekan Enter atau koma untuk menambah</p>
                 <Controller
                   name="tags"
                   control={control}
                   render={({ field }) => (
-                    <input
-                      {...field}
-                      type="text"
-                      placeholder="react, javascript, tutorial"
-                      className={inputClasses(false)}
-                    />
-                  )}
-                />
-              </motion.div>
-
-              {/* Featured */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="bg-white rounded-2xl border border-gray-100 p-6"
-              >
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">
-                  Pengaturan
-                </label>
-                <Controller
-                  name="featured"
-                  control={control}
-                  render={({ field }) => (
-                    <label className="flex items-center gap-3 cursor-pointer group">
-                      <input
-                        {...field}
-                        type="checkbox"
-                        checked={field.value}
-                        className="w-4 h-4 rounded border-gray-300 text-primary-blue focus:ring-primary-blue/20"
-                      />
-                      <span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
-                        Jadikan post unggulan
-                      </span>
-                    </label>
+                    <TagsInput value={field.value || []} onChange={field.onChange} />
                   )}
                 />
               </motion.div>

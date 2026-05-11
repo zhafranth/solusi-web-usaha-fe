@@ -202,6 +202,22 @@ export const getBlogs = async (params = {}) => {
 };
 
 /**
+ * Custom hook untuk mengambil detail blog by ID menggunakan React Query
+ * @param {number|string} id - ID blog
+ * @returns {Object} - Query result dengan data, loading, error states
+ */
+export const useBlogById = (id) => {
+  return useQuery({
+    queryKey: ["blog", id],
+    queryFn: () => getBlogById(id),
+    enabled: !!id,
+    staleTime: 2 * 60 * 1000,
+    retry: 1,
+    refetchOnWindowFocus: false,
+  });
+};
+
+/**
  * Custom hook untuk mengambil list blog menggunakan React Query
  * @param {Object} params - Parameter query
  * @returns {Object} - Query result dengan data, loading, error states

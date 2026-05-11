@@ -1,4 +1,5 @@
 import { api } from "../lib/api";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 /**
  * Upload gambar ke server
@@ -159,4 +160,49 @@ export const listImages = async (params = {}) => {
     }
     throw new Error("Gagal mengambil daftar gambar");
   }
+};
+
+/**
+ * Hook React Query: list gambar dengan filter type + pagination.
+ * @param {Object} [filters]
+ * @param {'featured'|'content'} [filters.type] - kosong = semua
+ * @param {number} [filters.page=1]
+ * @param {number} [filters.limit=20]
+ */
+export const useImages = (filters = {}) => {
+  const params = {
+    page: filters.page || 1,
+    limit: filters.limit || 20,
+    ...(filters.type ? { type: filters.type } : {}),
+  };
+  return useQuery({
+    queryKey: ["images", params],
+    queryFn: () => listImages(params),
+    staleTime: 60 * 1000,
+    retry: 1,
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
+  });
+};
+
+/**
+ * Hook React Query: delete gambar lalu invalidate list.
+ */
+export const useDeleteImage = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ filename, type }) => deleteImage(filename, type),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["images"] }),
+  });
+};
+
+/**
+ * Hook React Query: upload gambar (single) lalu invalidate list.
+ */
+export const useUploadImage = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ file, type }) => uploadImage(file, type),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["images"] }),
+  });
 };
