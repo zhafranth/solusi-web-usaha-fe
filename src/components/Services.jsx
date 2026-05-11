@@ -90,7 +90,7 @@ const itemVariants = {
   }
 };
 
-const ServiceCard = ({ service, index }) => {
+const ServiceCard = ({ service }) => {
   const Icon = service.icon;
   const isLarge = service.size === "lg";
 
@@ -228,7 +228,7 @@ const Services = () => {
           className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20"
         >
           {services.map((service, index) => (
-            <ServiceCard key={index} service={service} index={index} />
+            <ServiceCard key={index} service={service} />
           ))}
         </motion.div>
 
