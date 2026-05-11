@@ -1,0 +1,44 @@
+name: Deploy to Coolify
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build & Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Build
+        run: yarn build
+
+  deploy:
+    name: Trigger Coolify Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Coolify deploy webhook
+        run: |
+          curl --fail-with-body \
+            --request GET "${{ secrets.COOLIFY_WEBHOOK }}" \
+            --header "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}"
