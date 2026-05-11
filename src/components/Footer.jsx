@@ -47,7 +47,7 @@ const Footer = () => {
             <div className="flex items-center gap-2 mb-6">
               <div className="w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center">
                 <img
-                  src="/luminara-logo.jpeg"
+                  src="/logo-luminara.png"
                   alt="Luminara Codex"
                   className="w-full h-full object-cover"
                 />

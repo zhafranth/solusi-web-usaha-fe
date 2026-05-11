@@ -43,7 +43,7 @@ const Header = () => {
     { label: "Layanan", type: "scroll", target: "services" },
     { label: "Hasil Kerja", type: "scroll", target: "portfolio" },
     { label: "Harga", type: "scroll", target: "pricelist" },
-    { label: "Blog", type: "link", to: "/blog" },
+    // { label: "Blog", type: "link", to: "/blog" },
     { label: "Tentang", type: "scroll", target: "about" },
     { label: "Kontak", type: "scroll", target: "contact" },
   ]
@@ -66,7 +66,7 @@ const Header = () => {
             <Link to="/" className="flex items-center gap-2 group">
               <div className="w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center transform group-hover:scale-105 transition-transform duration-300">
                 <img
-                  src="/luminara-logo.jpeg"
+                  src="/logo-luminara.png"
                   alt="Luminara Codex"
                   className="w-full h-full object-cover"
                 />

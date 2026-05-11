@@ -414,7 +414,7 @@ const DashboardPage = () => {
           <Link to="/" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
               <img
-                src="/luminara-logo.jpeg"
+                src="/logo-luminara.png"
                 alt="Luminara Codex"
                 className="w-full h-full object-cover"
               />

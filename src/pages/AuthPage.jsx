@@ -116,7 +116,7 @@ const AuthPage = () => {
           <div className="text-center mb-8">
             <div className="w-14 h-14 mx-auto mb-4 rounded-2xl overflow-hidden flex items-center justify-center shadow-lg shadow-primary-blue/20">
               <img
-                src="/luminara-logo.jpeg"
+                src="/logo-luminara.png"
                 alt="Luminara Codex"
                 className="w-full h-full object-cover"
               />

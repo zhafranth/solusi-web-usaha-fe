@@ -1,5 +1,5 @@
 import { Button } from "./ui/button"
-import { CheckCircle, Users, Award, Clock, Target, ArrowRight } from "lucide-react"
+import { CheckCircle, Sparkles, Award, Clock, Target, ArrowRight } from "lucide-react"
 import { motion, useInView } from "framer-motion"
 import { useRef, useState, useEffect } from "react"
 
@@ -36,10 +36,10 @@ const AnimatedCounter = ({ target, suffix = "" }) => {
 }
 
 const achievements = [
-  { icon: Users, number: "50", suffix: "+", label: "Klien Puas", color: "from-primary-blue to-blue-400" },
-  { icon: Award, number: "100", suffix: "+", label: "Project Selesai", color: "from-primary-green to-emerald-400" },
-  { icon: Clock, number: "3", suffix: "+", label: "Tahun Pengalaman", color: "from-amber-500 to-orange-400" },
-  { icon: Target, number: "98", suffix: "%", label: "Tingkat Kepuasan", color: "from-violet-500 to-purple-400" },
+  { icon: Sparkles, number: "100", suffix: "%", label: "Solusi Custom", color: "from-primary-blue to-blue-400" },
+  { icon: Award, number: "100", suffix: "%", label: "Komitmen Mutu", color: "from-primary-green to-emerald-400" },
+  { icon: Clock, number: "24/7", suffix: "", label: "Support Aktif", color: "from-amber-500 to-orange-400" },
+  { icon: Target, number: "Gratis", suffix: "", label: "Konsultasi Awal", color: "from-violet-500 to-purple-400" },
 ]
 
 const whyChooseUs = [
@@ -86,7 +86,7 @@ const About = () => {
                 untuk Bisnis Anda
               </h2>
               <p className="text-lg text-gray-500 leading-relaxed">
-                Kami adalah tim profesional yang berdedikasi untuk membantu UMKM dan perusahaan dalam transformasi digital. Dengan pengalaman lebih dari 3 tahun, kami telah membantu ratusan klien mewujudkan visi digital mereka.
+                Kami adalah tim yang berdedikasi untuk membantu UMKM dan perusahaan dalam transformasi digital. Sebagai partner yang baru merintis, kami menghadirkan pendekatan personal, dedikasi penuh, dan tech stack modern untuk mewujudkan visi digital Anda — bukan sekadar daftar angka.
               </p>
             </div>
 

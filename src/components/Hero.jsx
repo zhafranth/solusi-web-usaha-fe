@@ -150,10 +150,10 @@ const Hero = () => {
                 <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl">
                   <div className="grid grid-cols-2 gap-6">
                     {[
-                      { number: "50+", label: "Klien Puas", color: "from-primary-green/20 to-primary-green/5" },
-                      { number: "100+", label: "Project Selesai", color: "from-primary-blue/20 to-blue-500/5" },
-                      { number: "3+", label: "Tahun Pengalaman", color: "from-yellow-500/20 to-yellow-500/5" },
-                      { number: "24/7", label: "Support", color: "from-purple-500/20 to-purple-500/5" },
+                      { number: "100%", label: "Solusi Custom", color: "from-primary-green/20 to-primary-green/5" },
+                      { number: "24/7", label: "Support Aktif", color: "from-primary-blue/20 to-blue-500/5" },
+                      { number: "Gratis", label: "Konsultasi Awal", color: "from-yellow-500/20 to-yellow-500/5" },
+                      { number: "Garansi", label: "Kepuasan Klien", color: "from-purple-500/20 to-purple-500/5" },
                     ].map((stat, i) => (
                       <motion.div
                         key={i}
@@ -201,9 +201,9 @@ const Hero = () => {
               className="grid grid-cols-3 gap-4 lg:hidden text-white"
             >
               {[
-                { number: "50+", label: "Klien Puas" },
-                { number: "100+", label: "Project" },
+                { number: "100%", label: "Custom" },
                 { number: "24/7", label: "Support" },
+                { number: "Gratis", label: "Konsultasi" },
               ].map((stat, i) => (
                 <div key={i} className="text-center p-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10">
                   <div className="text-2xl font-heading font-bold text-primary-green">{stat.number}</div>
