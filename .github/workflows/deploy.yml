@@ -1,44 +1,38 @@
-name: Deploy to Coolify
+name: Deploy to VPS
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 concurrency:
   group: deploy-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: Build & Lint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: yarn
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Lint
-        run: yarn lint
-
-      - name: Build
-        run: yarn build
-
   deploy:
-    name: Trigger Coolify Deploy
-    needs: build
+    name: Deploy to VPS
     runs-on: ubuntu-latest
     steps:
-      - name: Call Coolify deploy webhook
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add VPS to known hosts
         run: |
-          curl --fail-with-body \
-            --request GET "${{ secrets.COOLIFY_WEBHOOK }}" \
-            --header "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}"
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          ssh-keyscan -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Run deploy script on VPS
+        run: |
+          ssh "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            "cd '${{ secrets.DEPLOY_PATH }}' && ./scripts/deploy-stagging.sh"
+
+      - name: Health check
+        run: |
+          status=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 30 https://stagging.codex-lab.web.id)
+          echo "HTTP $status"
+          test "$status" = "200"
