@@ -41,7 +41,7 @@ const Header = () => {
   const navItems = [
     { label: "Beranda", type: "link", to: "/" },
     { label: "Layanan", type: "scroll", target: "services" },
-    { label: "Hasil Kerja", type: "scroll", target: "portfolio" },
+    // { label: "Hasil Kerja", type: "scroll", target: "portfolio" },
     { label: "Harga", type: "scroll", target: "pricelist" },
     // { label: "Blog", type: "link", to: "/blog" },
     { label: "Tentang", type: "scroll", target: "about" },

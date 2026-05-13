@@ -1,195 +1,165 @@
+import { useState, useEffect, useRef } from "react";
 import { Button } from "./ui/button";
 import {
-  Globe,
   Smartphone,
-  ShoppingCart,
-  Search,
-  Palette,
-  Headphones,
+  Globe,
+  Database,
+  Mail,
   ArrowRight,
   ArrowUpRight,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
 const services = [
   {
-    icon: Globe,
-    title: "Website Company Profile",
-    description:
-      "Website profesional untuk memperkenalkan perusahaan Anda dengan desain modern dan responsif.",
-    features: ["Desain Responsif", "SEO Friendly", "Admin Panel", "SSL Certificate"],
-    gradient: "from-blue-500 to-cyan-400",
-    accent: "bg-blue-500/10 text-blue-600",
-    size: "lg",
-  },
-  {
-    icon: ShoppingCart,
-    title: "E-Commerce Website",
-    description:
-      "Toko online lengkap dengan sistem pembayaran, manajemen produk, dan laporan penjualan.",
-    features: ["Payment Gateway", "Inventory Management", "Order Tracking", "Multi Vendor"],
-    gradient: "from-primary-green to-emerald-400",
-    accent: "bg-emerald-500/10 text-emerald-600",
-    size: "sm",
-  },
-  {
     icon: Smartphone,
-    title: "Web Application",
+    title: "Application Dev",
     description:
-      "Aplikasi web custom sesuai kebutuhan bisnis dengan fitur canggih dan user-friendly.",
-    features: ["Custom Features", "Database Integration", "API Development", "Cloud Hosting"],
+      "Pengembangan aplikasi mobile dan desktop yang powerful, scalable, dan user-friendly sesuai kebutuhan bisnis Anda.",
+    features: ["iOS & Android", "Cross Platform", "Cloud Sync", "Push Notification"],
     gradient: "from-violet-500 to-purple-400",
     accent: "bg-violet-500/10 text-violet-600",
-    size: "sm",
   },
   {
-    icon: Search,
-    title: "SEO Optimization",
+    icon: Globe,
+    title: "Web Development",
     description:
-      "Optimasi website untuk meningkatkan ranking di Google dan mendatangkan lebih banyak pengunjung.",
-    features: ["Keyword Research", "On-Page SEO", "Technical SEO", "Analytics Setup"],
-    gradient: "from-amber-500 to-orange-400",
-    accent: "bg-amber-500/10 text-amber-600",
-    size: "sm",
+      "Website modern dan responsif dengan performa tinggi, mulai dari company profile hingga aplikasi web kompleks.",
+    features: ["Responsive Design", "SEO Friendly", "Fast Loading", "Secure"],
+    gradient: "from-blue-500 to-cyan-400",
+    accent: "bg-blue-500/10 text-blue-600",
   },
   {
-    icon: Palette,
-    title: "UI/UX Design",
+    icon: Database,
+    title: "Data Solutions",
     description:
-      "Desain antarmuka yang menarik dan pengalaman pengguna yang optimal untuk website Anda.",
-    features: ["User Research", "Wireframing", "Prototyping", "Design System"],
+      "Solusi pengolahan, integrasi, dan visualisasi data untuk membantu pengambilan keputusan bisnis yang akurat.",
+    features: ["Data Pipeline", "Analytics", "Dashboard", "Integration"],
+    gradient: "from-primary-green to-emerald-400",
+    accent: "bg-emerald-500/10 text-emerald-600",
+  },
+  {
+    icon: Mail,
+    title: "Digital Invites",
+    description:
+      "Undangan digital elegan dan interaktif untuk pernikahan, acara perusahaan, dan event spesial Anda.",
+    features: ["Custom Theme", "RSVP Online", "Gallery", "Map Integration"],
     gradient: "from-pink-500 to-rose-400",
     accent: "bg-pink-500/10 text-pink-600",
-    size: "sm",
-  },
-  {
-    icon: Headphones,
-    title: "Maintenance & Support",
-    description:
-      "Layanan pemeliharaan dan dukungan teknis 24/7 untuk menjaga performa optimal.",
-    features: ["24/7 Support", "Regular Updates", "Backup Service", "Security Monitoring"],
-    gradient: "from-primary-blue to-blue-400",
-    accent: "bg-blue-500/10 text-blue-600",
-    size: "lg",
   },
 ];
 
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.1 }
-  }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }
-  }
-};
-
 const ServiceCard = ({ service }) => {
   const Icon = service.icon;
-  const isLarge = service.size === "lg";
 
   return (
-    <motion.div
-      variants={itemVariants}
-      className={`group relative ${isLarge ? "md:col-span-2 lg:col-span-2" : ""}`}
-    >
-      <div className="relative h-full bg-white rounded-3xl border border-gray-100 p-8 overflow-hidden transition-all duration-500 hover:shadow-card-hover hover:border-gray-200/50 hover:-translate-y-1">
+    <div className="group relative h-full">
+      <div className="relative h-full bg-white rounded-3xl border border-gray-100 p-8 overflow-hidden transition-all duration-500 hover:border-gray-200/50 hover:-translate-y-1">
         {/* Gradient glow on hover */}
         <div
           className={`absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-0 group-hover:opacity-[0.03] transition-opacity duration-500 rounded-3xl`}
         />
 
-        {isLarge ? (
-          /* Large card: horizontal layout to fill the wider space */
-          <div className="relative z-10 flex flex-col sm:flex-row sm:items-start gap-6 h-full">
-            {/* Left: icon + text */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between mb-5">
-                <div className={`p-3 rounded-2xl ${service.accent} transition-transform duration-300 group-hover:scale-110`}>
-                  <Icon size={28} />
-                </div>
-                <motion.div className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:border-primary-blue/30 group-hover:bg-primary-blue/5 sm:hidden">
-                  <ArrowUpRight size={16} className="text-primary-blue" />
-                </motion.div>
-              </div>
-              <h3 className="text-xl font-heading font-bold text-gray-900 mb-3 group-hover:text-primary-blue transition-colors">
-                {service.title}
-              </h3>
-              <p className="text-gray-500 text-sm leading-relaxed">
-                {service.description}
-              </p>
-            </div>
-
-            {/* Right: features + arrow */}
-            <div className="flex flex-col items-end justify-between sm:h-full sm:min-h-[140px] shrink-0">
-              <motion.div className="w-10 h-10 rounded-full border border-gray-200 items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:border-primary-blue/30 group-hover:bg-primary-blue/5 hidden sm:flex">
-                <ArrowUpRight size={16} className="text-primary-blue" />
-              </motion.div>
-              <div className="flex flex-wrap gap-2 sm:justify-end sm:max-w-[220px]">
-                {service.features.map((feature, i) => (
-                  <span
-                    key={i}
-                    className="px-3 py-1.5 text-xs font-medium bg-gray-50 text-gray-600 rounded-full border border-gray-100 group-hover:bg-primary-blue/5 group-hover:text-primary-blue group-hover:border-primary-blue/10 transition-colors"
-                  >
-                    {feature}
-                  </span>
-                ))}
-              </div>
-            </div>
+        {/* Top row: icon + arrow */}
+        <div className="flex items-start justify-between mb-5 relative z-10">
+          <div
+            className={`p-3 rounded-2xl ${service.accent} transition-transform duration-300 group-hover:scale-110`}
+          >
+            <Icon size={28} />
           </div>
-        ) : (
-          /* Small card: compact vertical layout */
-          <>
-            {/* Top row: icon + arrow */}
-            <div className="flex items-start justify-between mb-5 relative z-10">
-              <div className={`p-3 rounded-2xl ${service.accent} transition-transform duration-300 group-hover:scale-110`}>
-                <Icon size={28} />
-              </div>
-              <motion.div className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:border-primary-blue/30 group-hover:bg-primary-blue/5">
-                <ArrowUpRight size={16} className="text-primary-blue" />
-              </motion.div>
-            </div>
+          <div className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:border-primary-blue/30 group-hover:bg-primary-blue/5">
+            <ArrowUpRight size={16} className="text-primary-blue" />
+          </div>
+        </div>
 
-            {/* Content */}
-            <div className="relative z-10">
-              <h3 className="text-xl font-heading font-bold text-gray-900 mb-2 group-hover:text-primary-blue transition-colors">
-                {service.title}
-              </h3>
-              <p className="text-gray-500 text-sm leading-relaxed mb-5">
-                {service.description}
-              </p>
+        {/* Content */}
+        <div className="relative z-10">
+          <h3 className="text-xl font-heading font-bold text-gray-900 mb-2 group-hover:text-primary-blue transition-colors">
+            {service.title}
+          </h3>
+          <p className="text-gray-500 text-sm leading-relaxed mb-5">
+            {service.description}
+          </p>
 
-              {/* Feature pills */}
-              <div className="flex flex-wrap gap-2">
-                {service.features.map((feature, i) => (
-                  <span
-                    key={i}
-                    className="px-3 py-1.5 text-xs font-medium bg-gray-50 text-gray-600 rounded-full border border-gray-100 group-hover:bg-primary-blue/5 group-hover:text-primary-blue group-hover:border-primary-blue/10 transition-colors"
-                  >
-                    {feature}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
+          {/* Feature pills */}
+          <div className="flex flex-wrap gap-2">
+            {service.features.map((feature, i) => (
+              <span
+                key={i}
+                className="px-3 py-1.5 text-xs font-medium bg-gray-50 text-gray-600 rounded-full border border-gray-100 group-hover:bg-primary-blue/5 group-hover:text-primary-blue group-hover:border-primary-blue/10 transition-colors"
+              >
+                {feature}
+              </span>
+            ))}
+          </div>
+        </div>
 
         {/* Bottom gradient line */}
         <div
           className={`absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r ${service.gradient} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left`}
         />
       </div>
-    </motion.div>
+    </div>
   );
 };
 
+const AUTOPLAY_INTERVAL = 4000;
+
 const Services = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(3);
+  const [isPaused, setIsPaused] = useState(false);
+  const intervalRef = useRef(null);
+
+  useEffect(() => {
+    const updateVisibleCount = () => {
+      if (window.innerWidth < 768) {
+        setVisibleCount(1);
+      } else if (window.innerWidth < 1024) {
+        setVisibleCount(2);
+      } else {
+        setVisibleCount(3);
+      }
+    };
+
+    updateVisibleCount();
+    window.addEventListener("resize", updateVisibleCount);
+    return () => window.removeEventListener("resize", updateVisibleCount);
+  }, []);
+
+  const maxIndex = Math.max(0, services.length - visibleCount);
+
+  useEffect(() => {
+    if (currentIndex > maxIndex) {
+      setCurrentIndex(maxIndex);
+    }
+  }, [maxIndex, currentIndex]);
+
+  useEffect(() => {
+    if (isPaused || maxIndex === 0) return undefined;
+
+    intervalRef.current = setInterval(() => {
+      setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
+    }, AUTOPLAY_INTERVAL);
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [isPaused, maxIndex, currentIndex]);
+
+  const handlePrev = () => {
+    setCurrentIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
+  };
+
+  const cardWidthPercent = 100 / visibleCount;
+  const translatePercent = currentIndex * cardWidthPercent;
+
   return (
     <section id="services" className="py-24 bg-gray-50/50 relative overflow-hidden">
       {/* Background decoration */}
@@ -203,15 +173,14 @@ const Services = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-20"
+          className="text-center mb-16"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-blue/5 border border-primary-blue/10 text-primary-blue text-sm font-medium mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-primary-blue animate-pulse" />
             Layanan Kami
           </div>
           <h2 className="text-4xl lg:text-5xl font-heading font-bold text-gray-900 mb-6 text-balance">
-            Solusi Digital{" "}
-            <span className="gradient-text">Komprehensif</span>
+            Solusi Digital <span className="gradient-text">Komprehensif</span>
           </h2>
           <p className="text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
             Kami menyediakan berbagai layanan pengembangan web untuk membantu
@@ -219,18 +188,85 @@ const Services = () => {
           </p>
         </motion.div>
 
-        {/* Bento Grid */}
+        {/* Carousel Controls + Counter */}
         <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
-          className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20"
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="flex items-center justify-between mb-8"
         >
-          {services.map((service, index) => (
-            <ServiceCard key={index} service={service} />
-          ))}
+          <div className="flex items-center gap-3 text-sm text-gray-500">
+            <span className="font-heading font-semibold text-gray-900">
+              {String(currentIndex + 1).padStart(2, "0")}
+            </span>
+            <span className="w-12 h-px bg-gray-300" />
+            <span>
+              {String(services.length).padStart(2, "0")} Services
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handlePrev}
+              aria-label="Previous service"
+              className="w-12 h-12 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-700 transition-all duration-300 hover:border-primary-blue hover:bg-primary-blue hover:text-white hover:shadow-glass"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <button
+              type="button"
+              onClick={handleNext}
+              aria-label="Next service"
+              className="w-12 h-12 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-700 transition-all duration-300 hover:border-primary-blue hover:bg-primary-blue hover:text-white hover:shadow-glass"
+            >
+              <ChevronRight size={20} />
+            </button>
+          </div>
         </motion.div>
+
+        {/* Carousel */}
+        <div
+          className="overflow-hidden mb-12"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          onFocus={() => setIsPaused(true)}
+          onBlur={() => setIsPaused(false)}
+        >
+          <motion.div
+            className="flex"
+            animate={{ x: `-${translatePercent}%` }}
+            transition={{ type: "spring", stiffness: 120, damping: 20 }}
+          >
+            {services.map((service, index) => (
+              <div
+                key={index}
+                className="px-3 shrink-0"
+                style={{ width: `${cardWidthPercent}%` }}
+              >
+                <ServiceCard service={service} />
+              </div>
+            ))}
+          </motion.div>
+        </div>
+
+        {/* Progress dots */}
+        <div className="flex justify-center gap-2 mb-20">
+          {Array.from({ length: maxIndex + 1 }).map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setCurrentIndex(i)}
+              aria-label={`Go to slide ${i + 1}`}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                i === currentIndex
+                  ? "w-8 bg-primary-blue"
+                  : "w-1.5 bg-gray-300 hover:bg-gray-400"
+              }`}
+            />
+          ))}
+        </div>
 
         {/* CTA */}
         <motion.div
@@ -249,7 +285,7 @@ const Services = () => {
                 className="absolute inset-0 opacity-[0.03]"
                 style={{
                   backgroundImage: `radial-gradient(rgba(255,255,255,0.5) 1px, transparent 1px)`,
-                  backgroundSize: '24px 24px'
+                  backgroundSize: "24px 24px",
                 }}
               />
             </div>
@@ -268,7 +304,10 @@ const Services = () => {
                   className="bg-primary-green hover:bg-primary-green/90 text-white px-8 py-5 rounded-2xl shadow-lg shadow-primary-green/25 transition-all group text-base"
                 >
                   Konsultasi Gratis Sekarang
-                  <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={18} />
+                  <ArrowRight
+                    className="ml-2 group-hover:translate-x-1 transition-transform"
+                    size={18}
+                  />
                 </Button>
                 <Button
                   variant="outline"

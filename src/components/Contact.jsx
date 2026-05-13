@@ -139,30 +139,6 @@ const Contact = () => {
               )
             })}
 
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4 }}
-              className="relative bg-gray-900 rounded-3xl p-8 overflow-hidden"
-            >
-              <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary-blue/15 rounded-full blur-3xl" />
-                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-primary-green/15 rounded-full blur-3xl" />
-              </div>
-              <div className="relative z-10 text-center">
-                <h4 className="font-heading font-bold text-lg text-white mb-2">
-                  Konsultasi Gratis
-                </h4>
-                <p className="text-gray-400 text-sm mb-5 leading-relaxed">
-                  Dapatkan konsultasi gratis untuk proyek Anda.
-                </p>
-                <Button className="w-full bg-primary-green hover:bg-primary-green/90 text-white rounded-xl group transition-all">
-                  Jadwalkan Sekarang
-                  <ArrowRight size={14} className="ml-1.5 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </div>
-            </motion.div>
           </motion.div>
 
           <motion.div

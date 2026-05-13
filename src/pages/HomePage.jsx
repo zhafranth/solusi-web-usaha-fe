@@ -21,11 +21,7 @@ const HomePage = () => {
             <Services />
           </section>
         </AnimatedSection>
-        <AnimatedSection delay={100}>
-          <section id="portfolio">
-            <Portfolio />
-          </section>
-        </AnimatedSection>
+        
         <AnimatedSection delay={150}>
           <section id="pricelist">
             <Pricelist />

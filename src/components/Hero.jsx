@@ -1,6 +1,7 @@
 import { Button } from "./ui/button"
 import { ArrowRight, CheckCircle, Sparkles } from "lucide-react"
 import { motion } from "framer-motion"
+import PixelBlast from "./PixelBlast"
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -20,8 +21,24 @@ const Hero = () => {
       {/* Background */}
       <div className="absolute inset-0 bg-hero-gradient" />
 
+      {/* PixelBlast WebGL background */}
+      <div className="absolute inset-0">
+        <PixelBlast
+          variant="square"
+          patternScale={2.75}
+          color="#2b66e9"
+          pixelSize={6}
+          pixelSizeJitter={0.4}
+          enableRipples
+          rippleSpeed={0.4}
+          rippleThickness={0.12}
+          edgeFade={0.25}
+          transparent
+        />
+      </div>
+
       {/* Decorative elements */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
           animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
@@ -31,14 +48,6 @@ const Hero = () => {
           animate={{ scale: [1.2, 1, 1.2], opacity: [0.08, 0.15, 0.08] }}
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
           className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-white/10 blur-3xl"
-        />
-        {/* Grid pattern */}
-        <div
-          className="absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage: `linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px)`,
-            backgroundSize: '60px 60px'
-          }}
         />
       </div>
 
