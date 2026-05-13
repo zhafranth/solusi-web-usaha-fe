@@ -2,6 +2,7 @@ import { Button } from "./ui/button"
 import { ArrowRight, CheckCircle, Sparkles } from "lucide-react"
 import { motion } from "framer-motion"
 import PixelBlast from "./PixelBlast"
+import { useTranslation } from "../hooks/useTranslation"
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -13,6 +14,13 @@ const fadeUp = {
 }
 
 const Hero = () => {
+  const { t, language } = useTranslation()
+  const benefits = t("hero.benefits")
+  const stats = t("hero.stats")
+  const mobileStats = t("hero.mobileStats")
+  const freeLabel = language === "id" ? "Gratis" : "Free"
+  const guaranteeLabel = language === "id" ? "Garansi" : "Guarantee"
+
   return (
     <section
       id="home"
@@ -65,7 +73,7 @@ const Hero = () => {
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-sm font-medium"
               >
                 <Sparkles size={16} className="text-primary-green" />
-                <span>Solusi Digital untuk Bisnis Anda</span>
+                <span>{t("hero.badge")}</span>
               </motion.div>
 
               <motion.h1
@@ -75,12 +83,12 @@ const Hero = () => {
                 variants={fadeUp}
                 className="text-4xl lg:text-6xl xl:text-7xl font-heading font-bold leading-[1.1] tracking-tight"
               >
-                Wujudkan
+                {t("hero.title.line1")}
                 <br />
-                Bisnis Digital
+                {t("hero.title.line2")}
                 <br />
                 <span className="relative">
-                  <span className="text-primary-green">Bersama Kami</span>
+                  <span className="text-primary-green">{t("hero.title.line3")}</span>
                   <motion.svg
                     initial={{ pathLength: 0 }}
                     animate={{ pathLength: 1 }}
@@ -109,16 +117,12 @@ const Hero = () => {
                 variants={fadeUp}
                 className="text-lg lg:text-xl text-blue-100/90 max-w-lg leading-relaxed"
               >
-                Kami membantu UMKM dan perusahaan membangun website dan aplikasi web yang profesional, responsif, dan menguntungkan.
+                {t("hero.description")}
               </motion.p>
 
               {/* Benefits */}
               <motion.div custom={3} initial="hidden" animate="visible" variants={fadeUp} className="space-y-3">
-                {[
-                  "Website Responsif & Modern",
-                  "SEO Optimized untuk Ranking Google",
-                  "Maintenance & Support 24/7"
-                ].map((benefit, i) => (
+                {benefits.map((benefit, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <div className="w-5 h-5 rounded-full bg-primary-green/20 flex items-center justify-center">
                       <CheckCircle className="text-primary-green" size={14} />
@@ -134,7 +138,7 @@ const Hero = () => {
                   size="lg"
                   className="bg-primary-green hover:bg-primary-green/90 text-white text-base px-8 py-5 rounded-2xl shadow-lg shadow-primary-green/25 hover:shadow-xl hover:shadow-primary-green/30 transition-all group"
                 >
-                  Mulai Konsultasi Gratis
+                  {t("hero.ctaPrimary")}
                   <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={18} />
                 </Button>
                 <Button
@@ -142,7 +146,7 @@ const Hero = () => {
                   size="lg"
                   className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:border-white/50 hover:text-white text-base px-8 py-5 rounded-2xl backdrop-blur-sm transition-all"
                 >
-                  Lihat Portfolio
+                  {t("hero.ctaSecondary")}
                 </Button>
               </motion.div>
             </div>
@@ -159,10 +163,10 @@ const Hero = () => {
                 <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl">
                   <div className="grid grid-cols-2 gap-6">
                     {[
-                      { number: "100%", label: "Solusi Custom", color: "from-primary-green/20 to-primary-green/5" },
-                      { number: "24/7", label: "Support Aktif", color: "from-primary-blue/20 to-blue-500/5" },
-                      { number: "Gratis", label: "Konsultasi Awal", color: "from-yellow-500/20 to-yellow-500/5" },
-                      { number: "Garansi", label: "Kepuasan Klien", color: "from-purple-500/20 to-purple-500/5" },
+                      { number: "100%", label: stats.custom, color: "from-primary-green/20 to-primary-green/5" },
+                      { number: "24/7", label: stats.support, color: "from-primary-blue/20 to-blue-500/5" },
+                      { number: freeLabel, label: stats.consultation, color: "from-yellow-500/20 to-yellow-500/5" },
+                      { number: guaranteeLabel, label: stats.guarantee, color: "from-purple-500/20 to-purple-500/5" },
                     ].map((stat, i) => (
                       <motion.div
                         key={i}
@@ -186,7 +190,7 @@ const Hero = () => {
                 >
                   <div className="flex items-center gap-2 text-white">
                     <CheckCircle size={18} />
-                    <span className="font-heading font-bold text-sm">Terpercaya</span>
+                    <span className="font-heading font-bold text-sm">{stats.trusted}</span>
                   </div>
                 </motion.div>
 
@@ -210,9 +214,9 @@ const Hero = () => {
               className="grid grid-cols-3 gap-4 lg:hidden text-white"
             >
               {[
-                { number: "100%", label: "Custom" },
-                { number: "24/7", label: "Support" },
-                { number: "Gratis", label: "Konsultasi" },
+                { number: "100%", label: mobileStats.custom },
+                { number: "24/7", label: mobileStats.support },
+                { number: freeLabel, label: mobileStats.consultation },
               ].map((stat, i) => (
                 <div key={i} className="text-center p-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10">
                   <div className="text-2xl font-heading font-bold text-primary-green">{stat.number}</div>

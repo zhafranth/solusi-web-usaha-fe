@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
 import { submitContact } from "../services/contactService"
+import { useTranslation } from "../hooks/useTranslation"
 
 const contactSchema = yup.object().shape({
   name: yup
@@ -36,7 +37,11 @@ const contactSchema = yup.object().shape({
 
 const defaultValues = { name: "", email: "", subject: "", message: "" }
 
+const contactIcons = [Phone, Mail, MapPin, Clock]
+const contactContents = ["+62 812-3456-7890", "info@luminaracodex.com", "Jakarta, Indonesia", "09:00 - 18:00 WIB"]
+
 const Contact = () => {
+  const { t } = useTranslation()
   const {
     register,
     handleSubmit,
@@ -62,16 +67,16 @@ const Contact = () => {
       await submitContact(data)
       reset(defaultValues, { keepIsSubmitted: true })
     } catch (error) {
-      setError("root", { type: "server", message: error.message || "Gagal mengirim pesan" })
+      setError("root", { type: "server", message: error.message || t("contact.defaultError") })
     }
   }
 
-  const contactInfo = [
-    { icon: Phone, title: "Telepon", content: "+62 812-3456-7890", description: "Senin - Jumat, 09:00 - 18:00" },
-    { icon: Mail, title: "Email", content: "info@luminaracodex.com", description: "Respon dalam 24 jam" },
-    { icon: MapPin, title: "Alamat", content: "Jakarta, Indonesia", description: "Konsultasi online tersedia" },
-    { icon: Clock, title: "Jam Operasional", content: "09:00 - 18:00 WIB", description: "Senin - Jumat" },
-  ]
+  const contactInfo = t("contact.info").map((info, i) => ({
+    icon: contactIcons[i],
+    title: info.title,
+    content: contactContents[i],
+    description: info.description,
+  }))
 
   const baseInputClasses = "w-full px-4 py-3.5 bg-gray-50 border rounded-xl focus:ring-2 focus:ring-primary-blue/20 focus:border-primary-blue focus:bg-white font-body text-sm transition-all outline-none"
   const inputClass = (hasError) => `${baseInputClasses} ${hasError ? "border-red-300 focus:ring-red-200 focus:border-red-400" : "border-gray-200"}`
@@ -94,13 +99,13 @@ const Contact = () => {
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-blue/5 border border-primary-blue/10 text-primary-blue text-sm font-medium mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-primary-blue animate-pulse" />
-            Hubungi Kami
+            {t("contact.badge")}
           </div>
           <h2 className="text-4xl lg:text-5xl font-heading font-bold text-gray-900 mb-6 text-balance">
-            Mari <span className="gradient-text">Berdiskusi</span>
+            {t("contact.titlePart1")} <span className="gradient-text">{t("contact.titleHighlight")}</span>
           </h2>
           <p className="text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
-            Siap untuk memulai proyek digital Anda? Tim ahli kami siap membantu mewujudkan visi bisnis Anda.
+            {t("contact.subtitle")}
           </p>
         </motion.div>
 
@@ -150,7 +155,7 @@ const Contact = () => {
           >
             <div className="bg-white rounded-3xl p-8 lg:p-10 border border-gray-100 shadow-glass">
               <h3 className="text-xl font-heading font-bold text-gray-900 mb-8">
-                Kirim Pesan
+                {t("contact.formTitle")}
               </h3>
 
               <AnimatePresence>
@@ -163,9 +168,9 @@ const Contact = () => {
                   >
                     <CheckCircle2 className="w-5 h-5 text-primary-green flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-sm font-semibold text-primary-green">Pesan terkirim</p>
+                      <p className="text-sm font-semibold text-primary-green">{t("contact.successTitle")}</p>
                       <p className="text-xs text-gray-600">
-                        Terima kasih! Tim kami akan segera menghubungi Anda.
+                        {t("contact.successDesc")}
                       </p>
                     </div>
                   </motion.div>
@@ -186,27 +191,27 @@ const Contact = () => {
                 <div className="grid md:grid-cols-2 gap-5">
                   <div>
                     <label htmlFor="name" className="block text-xs font-medium text-gray-600 mb-2 uppercase tracking-wider">
-                      Nama Lengkap *
+                      {t("contact.labels.name")}
                     </label>
                     <input
                       type="text"
                       id="name"
                       {...register("name")}
                       className={inputClass(!!errors.name)}
-                      placeholder="Masukkan nama lengkap"
+                      placeholder={t("contact.placeholders.name")}
                     />
                     {errors.name && <p className="mt-1.5 text-xs text-red-500">{errors.name.message}</p>}
                   </div>
                   <div>
                     <label htmlFor="email" className="block text-xs font-medium text-gray-600 mb-2 uppercase tracking-wider">
-                      Email *
+                      {t("contact.labels.email")}
                     </label>
                     <input
                       type="email"
                       id="email"
                       {...register("email")}
                       className={inputClass(!!errors.email)}
-                      placeholder="nama@email.com"
+                      placeholder={t("contact.placeholders.email")}
                     />
                     {errors.email && <p className="mt-1.5 text-xs text-red-500">{errors.email.message}</p>}
                   </div>
@@ -214,28 +219,28 @@ const Contact = () => {
 
                 <div>
                   <label htmlFor="subject" className="block text-xs font-medium text-gray-600 mb-2 uppercase tracking-wider">
-                    Subjek *
+                    {t("contact.labels.subject")}
                   </label>
                   <input
                     type="text"
                     id="subject"
                     {...register("subject")}
                     className={inputClass(!!errors.subject)}
-                    placeholder="Singkat tentang topik pesan Anda"
+                    placeholder={t("contact.placeholders.subject")}
                   />
                   {errors.subject && <p className="mt-1.5 text-xs text-red-500">{errors.subject.message}</p>}
                 </div>
 
                 <div>
                   <label htmlFor="message" className="block text-xs font-medium text-gray-600 mb-2 uppercase tracking-wider">
-                    Pesan *
+                    {t("contact.labels.message")}
                   </label>
                   <textarea
                     id="message"
                     rows={5}
                     {...register("message")}
                     className={`${inputClass(!!errors.message)} resize-none`}
-                    placeholder="Ceritakan tentang proyek yang Anda inginkan..."
+                    placeholder={t("contact.placeholders.message")}
                   />
                   {errors.message && <p className="mt-1.5 text-xs text-red-500">{errors.message.message}</p>}
                 </div>
@@ -249,12 +254,12 @@ const Contact = () => {
                   {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 animate-spin" size={18} />
-                      Mengirim...
+                      {t("contact.submitting")}
                     </>
                   ) : (
                     <>
                       <Send className="mr-2 group-hover:rotate-12 transition-transform" size={18} />
-                      Kirim Pesan
+                      {t("contact.submit")}
                     </>
                   )}
                 </Button>

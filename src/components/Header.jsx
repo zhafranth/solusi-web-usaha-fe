@@ -4,8 +4,10 @@ import { useState, useEffect } from "react"
 import { Link, useLocation } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import ScrollProgressBar from "./ScrollProgressBar"
+import LanguageToggle from "./LanguageToggle"
 import { useAuth } from "../hooks/useAuth"
 import { useLogout } from "../services/authService"
+import { useTranslation } from "../hooks/useTranslation"
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -13,6 +15,7 @@ const Header = () => {
   const location = useLocation()
   const { isAuthenticated, user } = useAuth()
   const { logout: handleLogoutAction } = useLogout()
+  const { t } = useTranslation()
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20)
@@ -39,13 +42,11 @@ const Header = () => {
   }
 
   const navItems = [
-    { label: "Beranda", type: "link", to: "/" },
-    { label: "Layanan", type: "scroll", target: "services" },
-    // { label: "Hasil Kerja", type: "scroll", target: "portfolio" },
-    { label: "Harga", type: "scroll", target: "pricelist" },
-    // { label: "Blog", type: "link", to: "/blog" },
-    { label: "Tentang", type: "scroll", target: "about" },
-    { label: "Kontak", type: "scroll", target: "contact" },
+    { label: t("header.nav.home"), type: "link", to: "/" },
+    { label: t("header.nav.services"), type: "scroll", target: "services" },
+    { label: t("header.nav.pricelist"), type: "scroll", target: "pricelist" },
+    { label: t("header.nav.about"), type: "scroll", target: "about" },
+    { label: t("header.nav.contact"), type: "scroll", target: "contact" },
   ]
 
   return (
@@ -101,6 +102,7 @@ const Header = () => {
 
             {/* CTA */}
             <div className="hidden md:flex items-center gap-3">
+              <LanguageToggle />
               {isAuthenticated ? (
                 <>
                   <Link
@@ -110,7 +112,7 @@ const Header = () => {
                     <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary-blue to-primary-green flex items-center justify-center">
                       <User size={14} className="text-white" />
                     </div>
-                    <span>{user?.name || 'Dashboard'}</span>
+                    <span>{user?.name || t("header.dashboard")}</span>
                   </Link>
                   <Button
                     onClick={handleLogout}
@@ -120,7 +122,7 @@ const Header = () => {
 
                   >
                     <LogOut size={14} className="mr-1.5" />
-                    Logout
+                    {t("header.logout")}
                   </Button>
                 </>
               ) : (
@@ -129,7 +131,7 @@ const Header = () => {
                   size="sm"
                   className="bg-primary-blue hover:bg-primary-blue/90 text-white rounded-xl shadow-md shadow-primary-blue/25 hover:shadow-lg hover:shadow-primary-blue/30 transition-all"
                 >
-                  Konsultasi Gratis
+                  {t("header.cta")}
                   <ArrowRight size={14} className="ml-1.5" />
                 </Button>
               )}
@@ -181,7 +183,10 @@ const Header = () => {
                     )}
                   </motion.div>
                 ))}
-                <div className="pt-3 mt-2 border-t border-gray-100">
+                <div className="pt-3 mt-2 border-t border-gray-100 space-y-3">
+                  <div className="flex justify-center">
+                    <LanguageToggle />
+                  </div>
                   {isAuthenticated ? (
                     <div className="space-y-2">
                       <Link
@@ -190,16 +195,16 @@ const Header = () => {
                         className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600 hover:text-primary-blue rounded-xl"
                       >
                         <User size={16} />
-                        <span>{user?.name || 'Dashboard'}</span>
+                        <span>{user?.name || t("header.dashboard")}</span>
                       </Link>
                       <Button
                         onClick={() => { handleLogout(); setIsMenuOpen(false); }}
                         variant="outline"
                         className="w-full border-red-200 text-red-500 hover:bg-red-50 rounded-xl"
-    
+
                       >
                         <LogOut size={14} className="mr-2" />
-                        Logout
+                        {t("header.logout")}
                       </Button>
                     </div>
                   ) : (
@@ -207,7 +212,7 @@ const Header = () => {
                       onClick={() => { scrollToSection('contact'); setIsMenuOpen(false); }}
                       className="w-full bg-primary-blue text-white rounded-xl"
                     >
-                      Konsultasi Gratis
+                      {t("header.cta")}
                       <ArrowRight size={14} className="ml-1.5" />
                     </Button>
                   )}

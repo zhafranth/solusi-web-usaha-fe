@@ -2,6 +2,7 @@ import { Button } from "./ui/button"
 import { CheckCircle, Sparkles, Award, Clock, Target, ArrowRight } from "lucide-react"
 import { motion, useInView } from "framer-motion"
 import { useRef, useState, useEffect } from "react"
+import { useTranslation } from "../hooks/useTranslation"
 
 const AnimatedCounter = ({ target, suffix = "" }) => {
   const ref = useRef(null)
@@ -35,30 +36,28 @@ const AnimatedCounter = ({ target, suffix = "" }) => {
   )
 }
 
-const achievements = [
-  { icon: Sparkles, number: "100", suffix: "%", label: "Solusi Custom", color: "from-primary-blue to-blue-400" },
-  { icon: Award, number: "100", suffix: "%", label: "Komitmen Mutu", color: "from-primary-green to-emerald-400" },
-  { icon: Clock, number: "24/7", suffix: "", label: "Support Aktif", color: "from-amber-500 to-orange-400" },
-  { icon: Target, number: "Gratis", suffix: "", label: "Konsultasi Awal", color: "from-violet-500 to-purple-400" },
-]
-
-const whyChooseUs = [
-  "Tim developer berpengalaman dengan keahlian terkini",
-  "Proses development yang transparan dan terstruktur",
-  "Harga kompetitif dengan kualitas premium",
-  "Support dan maintenance jangka panjang",
-  "Garansi revisi hingga Anda puas",
-  "Delivery tepat waktu sesuai timeline",
-]
-
-const processSteps = [
-  { step: "01", title: "Konsultasi & Analisis", desc: "Memahami kebutuhan bisnis Anda" },
-  { step: "02", title: "Desain & Prototype", desc: "Merancang solusi yang tepat" },
-  { step: "03", title: "Development & Testing", desc: "Membangun dengan kualitas tinggi" },
-  { step: "04", title: "Launch & Maintenance", desc: "Peluncuran dan dukungan berkelanjutan" },
+const achievementStyles = [
+  { icon: Sparkles, number: "100", suffix: "%", color: "from-primary-blue to-blue-400" },
+  { icon: Award, number: "100", suffix: "%", color: "from-primary-green to-emerald-400" },
+  { icon: Clock, number: "24/7", suffix: "", color: "from-amber-500 to-orange-400" },
+  { icon: Target, number: null, suffix: "", color: "from-violet-500 to-purple-400" },
 ]
 
 const About = () => {
+  const { t, language } = useTranslation()
+  const whyChooseUs = t("about.whyList")
+  const achievementLabels = t("about.achievements")
+  const processSteps = t("about.processSteps").map((item, i) => ({
+    step: String(i + 1).padStart(2, "0"),
+    ...item,
+  }))
+  const freeLabel = language === "id" ? "Gratis" : "Free"
+  const achievements = achievementStyles.map((style, i) => ({
+    ...style,
+    number: style.number ?? freeLabel,
+    label: achievementLabels[i].label,
+  }))
+
   return (
     <section id="about" className="py-24 bg-white relative overflow-hidden">
       {/* Background */}
@@ -78,22 +77,22 @@ const About = () => {
             <div className="space-y-6">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-blue/5 border border-primary-blue/10 text-primary-blue text-sm font-medium">
                 <span className="w-1.5 h-1.5 rounded-full bg-primary-blue animate-pulse" />
-                Tentang Kami
+                {t("about.badge")}
               </div>
               <h2 className="text-4xl lg:text-5xl font-heading font-bold text-gray-900 leading-tight">
-                Partner Digital{" "}
-                <span className="gradient-text">Terpercaya</span>{" "}
-                untuk Bisnis Anda
+                {t("about.titlePart1")}{" "}
+                <span className="gradient-text">{t("about.titleHighlight")}</span>{" "}
+                {t("about.titlePart2")}
               </h2>
               <p className="text-lg text-gray-500 leading-relaxed">
-                Kami adalah tim yang berdedikasi untuk membantu UMKM dan perusahaan dalam transformasi digital. Sebagai partner yang baru merintis, kami menghadirkan pendekatan personal, dedikasi penuh, dan tech stack modern untuk mewujudkan visi digital Anda — bukan sekadar daftar angka.
+                {t("about.description")}
               </p>
             </div>
 
             {/* Why Choose Us */}
             <div className="space-y-4">
               <h3 className="text-lg font-heading font-bold text-gray-900">
-                Mengapa Memilih Kami?
+                {t("about.whyTitle")}
               </h3>
               <div className="grid gap-3">
                 {whyChooseUs.map((reason, index) => (
@@ -118,7 +117,7 @@ const About = () => {
               size="lg"
               className="bg-primary-blue hover:bg-primary-blue/90 text-white px-8 py-5 rounded-2xl shadow-md shadow-primary-blue/20 group transition-all"
             >
-              Hubungi Tim Kami
+              {t("about.cta")}
               <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={18} />
             </Button>
           </motion.div>
@@ -167,7 +166,7 @@ const About = () => {
 
               <div className="relative z-10">
                 <h4 className="text-lg font-heading font-bold text-white mb-8">
-                  Proses Kerja Kami
+                  {t("about.processTitle")}
                 </h4>
                 <div className="space-y-6">
                   {processSteps.map((item, i) => (

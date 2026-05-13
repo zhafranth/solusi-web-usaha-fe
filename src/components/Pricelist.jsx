@@ -1,74 +1,35 @@
 import { Button } from "./ui/button"
 import { Check, Star, ArrowRight, MessageCircle, Zap, Crown, Rocket } from "lucide-react"
 import { motion } from "framer-motion"
+import { useTranslation } from "../hooks/useTranslation"
 
 const WA_NUMBER = "6281234567890"
 const WA_URL = `https://wa.me/${WA_NUMBER}`
 
-const packages = [
+const packageStyles = [
   {
-    name: "Starter",
     icon: Zap,
     price: "2 Juta",
-    suffix: "mulai dari",
-    description: "Cocok untuk UMKM dan bisnis kecil yang ingin hadir secara profesional di dunia digital.",
+    priceEn: "2 Million",
     gradient: "from-primary-blue to-blue-400",
-    features: [
-      "Website Company Profile",
-      "Desain Responsif (Mobile Friendly)",
-      "Hingga 5 Halaman",
-      "Formulir Kontak",
-      "Integrasi WhatsApp",
-      "SSL Certificate",
-      "1 Bulan Support Gratis",
-    ],
     popular: false,
-    cta: "Mulai Sekarang",
-    waMessage: "Halo, saya tertarik dengan paket Starter untuk website company profile. Bisa konsultasi lebih lanjut?",
+    suffixKey: "from",
   },
   {
-    name: "Business",
     icon: Crown,
     price: "5 Juta",
-    suffix: "mulai dari",
-    description: "Solusi lengkap untuk bisnis yang membutuhkan fitur lebih dan tampilan premium.",
+    priceEn: "5 Million",
     gradient: "from-primary-green to-emerald-400",
-    features: [
-      "Semua fitur Starter",
-      "Desain Custom Premium",
-      "Hingga 10 Halaman",
-      "SEO On-Page Optimization",
-      "Blog / Artikel System",
-      "Google Analytics Setup",
-      "Admin Panel (CMS)",
-      "3 Bulan Support Gratis",
-      "Revisi Tanpa Batas",
-    ],
     popular: true,
-    cta: "Pilih Business",
-    waMessage: "Halo, saya tertarik dengan paket Business. Bisa konsultasi lebih lanjut?",
+    suffixKey: "from",
   },
   {
-    name: "Enterprise",
     icon: Rocket,
     price: "Custom",
-    suffix: "hubungi kami",
-    description: "Untuk kebutuhan khusus seperti e-commerce, web app, atau sistem custom sesuai bisnis Anda.",
+    priceEn: "Custom",
     gradient: "from-violet-500 to-purple-400",
-    features: [
-      "Semua fitur Business",
-      "E-Commerce / Web Application",
-      "Payment Gateway Integration",
-      "Custom Fitur Sesuai Kebutuhan",
-      "API Development",
-      "Database & Cloud Hosting",
-      "Priority Support 24/7",
-      "6 Bulan Support Gratis",
-      "Training & Dokumentasi",
-    ],
     popular: false,
-    cta: "Konsultasi Dulu",
-    waMessage: "Halo, saya tertarik dengan paket Enterprise. Bisa konsultasi untuk kebutuhan custom saya?",
+    suffixKey: "contact",
   },
 ]
 
@@ -88,7 +49,7 @@ const cardVariants = {
   },
 }
 
-const PricingCard = ({ pkg }) => {
+const PricingCard = ({ pkg, popularLabel }) => {
   const Icon = pkg.icon
 
   return (
@@ -98,7 +59,7 @@ const PricingCard = ({ pkg }) => {
         <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
           <div className="flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-primary-green to-emerald-400 rounded-full text-white text-xs font-heading font-bold shadow-lg shadow-primary-green/30">
             <Star size={12} fill="currentColor" />
-            Paling Populer
+            {popularLabel}
           </div>
         </div>
       )}
@@ -209,6 +170,18 @@ const PricingCard = ({ pkg }) => {
 }
 
 const Pricelist = () => {
+  const { t, language } = useTranslation()
+  const packageData = t("pricelist.packages")
+  const suffixFrom = t("pricelist.suffixFrom")
+  const suffixContact = t("pricelist.suffixContact")
+  const packages = packageStyles.map((style, i) => ({
+    ...style,
+    ...packageData[i],
+    price: language === "en" ? style.priceEn : style.price,
+    suffix: style.suffixKey === "from" ? suffixFrom : suffixContact,
+  }))
+  const trustItems = t("pricelist.trustItems")
+
   return (
     <section id="pricelist" className="py-24 bg-white relative overflow-hidden">
       {/* Background */}
@@ -227,14 +200,13 @@ const Pricelist = () => {
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-blue/5 border border-primary-blue/10 text-primary-blue text-sm font-medium mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-primary-blue animate-pulse" />
-            Harga & Paket
+            {t("pricelist.badge")}
           </div>
           <h2 className="text-4xl lg:text-5xl font-heading font-bold text-gray-900 mb-6 text-balance">
-            Investasi <span className="gradient-text">Terjangkau</span> untuk Bisnis Anda
+            {t("pricelist.titlePart1")} <span className="gradient-text">{t("pricelist.titleHighlight")}</span> {t("pricelist.titlePart2")}
           </h2>
           <p className="text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
-            Mulai dari <span className="font-semibold text-primary-blue">Rp 2 Juta</span>, Anda sudah bisa memiliki
-            website company profile profesional yang siap meningkatkan kredibilitas bisnis Anda.
+            {t("pricelist.subtitle1")} <span className="font-semibold text-primary-blue">{t("pricelist.subtitleAmount")}</span>{t("pricelist.subtitle2")}
           </p>
         </motion.div>
 
@@ -246,7 +218,7 @@ const Pricelist = () => {
           transition={{ duration: 0.6, delay: 0.15 }}
           className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-gray-400 mb-16"
         >
-          {["Tanpa biaya tersembunyi", "Gratis domain & hosting tahun pertama", "Garansi uang kembali"].map((item, i) => (
+          {trustItems.map((item, i) => (
             <div key={i} className="flex items-center gap-2">
               <Check size={14} className="text-primary-green" />
               <span>{item}</span>
@@ -263,7 +235,7 @@ const Pricelist = () => {
           className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-6 items-start mb-20"
         >
           {packages.map((pkg, index) => (
-            <PricingCard key={index} pkg={pkg} />
+            <PricingCard key={index} pkg={pkg} popularLabel={t("pricelist.popularBadge")} />
           ))}
         </motion.div>
 
@@ -292,20 +264,20 @@ const Pricelist = () => {
             <div className="relative z-10 text-center max-w-2xl mx-auto">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-green/10 border border-primary-green/20 text-primary-green text-sm font-medium mb-6">
                 <MessageCircle size={16} />
-                Konsultasi Gratis via WhatsApp
+                {t("pricelist.waCta.badge")}
               </div>
               <h3 className="text-3xl lg:text-4xl font-heading font-bold text-white mb-4">
-                Bingung Pilih Paket?
+                {t("pricelist.waCta.title")}
               </h3>
               <p className="text-gray-400 text-lg mb-4 leading-relaxed">
-                Tidak perlu khawatir! Tim kami siap membantu Anda memilih paket yang paling sesuai dengan kebutuhan dan budget bisnis Anda.
+                {t("pricelist.waCta.subtitle1")}
               </p>
               <p className="text-gray-500 text-sm mb-10">
-                Konsultasi gratis, tanpa komitmen. Ceritakan kebutuhan Anda dan dapatkan rekomendasi terbaik dari tim ahli kami.
+                {t("pricelist.waCta.subtitle2")}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a
-                  href={`${WA_URL}?text=${encodeURIComponent("Halo, saya ingin konsultasi mengenai pembuatan website. Bisa bantu saya memilih paket yang sesuai?")}`}
+                  href={`${WA_URL}?text=${encodeURIComponent(t("pricelist.waCta.waMessage"))}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -314,7 +286,7 @@ const Pricelist = () => {
                     className="bg-primary-green hover:bg-primary-green/90 text-white px-8 py-5 rounded-2xl shadow-lg shadow-primary-green/25 transition-all group text-base"
                   >
                     <MessageCircle size={18} className="mr-2" />
-                    Chat WhatsApp Sekarang
+                    {t("pricelist.waCta.button")}
                     <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={18} />
                   </Button>
                 </a>

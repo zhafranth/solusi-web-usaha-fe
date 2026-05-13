@@ -11,41 +11,26 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTranslation } from "../hooks/useTranslation";
 
-const services = [
+const serviceStyles = [
   {
     icon: Smartphone,
-    title: "Application Dev",
-    description:
-      "Pengembangan aplikasi mobile dan desktop yang powerful, scalable, dan user-friendly sesuai kebutuhan bisnis Anda.",
-    features: ["iOS & Android", "Cross Platform", "Cloud Sync", "Push Notification"],
     gradient: "from-violet-500 to-purple-400",
     accent: "bg-violet-500/10 text-violet-600",
   },
   {
     icon: Globe,
-    title: "Web Development",
-    description:
-      "Website modern dan responsif dengan performa tinggi, mulai dari company profile hingga aplikasi web kompleks.",
-    features: ["Responsive Design", "SEO Friendly", "Fast Loading", "Secure"],
     gradient: "from-blue-500 to-cyan-400",
     accent: "bg-blue-500/10 text-blue-600",
   },
   {
     icon: Database,
-    title: "Data Solutions",
-    description:
-      "Solusi pengolahan, integrasi, dan visualisasi data untuk membantu pengambilan keputusan bisnis yang akurat.",
-    features: ["Data Pipeline", "Analytics", "Dashboard", "Integration"],
     gradient: "from-primary-green to-emerald-400",
     accent: "bg-emerald-500/10 text-emerald-600",
   },
   {
     icon: Mail,
-    title: "Digital Invites",
-    description:
-      "Undangan digital elegan dan interaktif untuk pernikahan, acara perusahaan, dan event spesial Anda.",
-    features: ["Custom Theme", "RSVP Online", "Gallery", "Map Integration"],
     gradient: "from-pink-500 to-rose-400",
     accent: "bg-pink-500/10 text-pink-600",
   },
@@ -108,6 +93,9 @@ const ServiceCard = ({ service }) => {
 const AUTOPLAY_INTERVAL = 4000;
 
 const Services = () => {
+  const { t } = useTranslation();
+  const items = t("services.items");
+  const services = items.map((item, i) => ({ ...serviceStyles[i], ...item }));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [visibleCount, setVisibleCount] = useState(3);
   const [isPaused, setIsPaused] = useState(false);
@@ -177,14 +165,13 @@ const Services = () => {
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-blue/5 border border-primary-blue/10 text-primary-blue text-sm font-medium mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-primary-blue animate-pulse" />
-            Layanan Kami
+            {t("services.badge")}
           </div>
           <h2 className="text-4xl lg:text-5xl font-heading font-bold text-gray-900 mb-6 text-balance">
-            Solusi Digital <span className="gradient-text">Komprehensif</span>
+            {t("services.titlePart1")} <span className="gradient-text">{t("services.titlePart2")}</span>
           </h2>
           <p className="text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
-            Kami menyediakan berbagai layanan pengembangan web untuk membantu
-            bisnis Anda berkembang di era digital.
+            {t("services.subtitle")}
           </p>
         </motion.div>
 
@@ -202,7 +189,7 @@ const Services = () => {
             </span>
             <span className="w-12 h-px bg-gray-300" />
             <span>
-              {String(services.length).padStart(2, "0")} Services
+              {String(services.length).padStart(2, "0")} {t("services.counterLabel")}
             </span>
           </div>
 
@@ -292,18 +279,17 @@ const Services = () => {
 
             <div className="relative z-10 text-center max-w-2xl mx-auto">
               <h3 className="text-3xl lg:text-4xl font-heading font-bold text-white mb-4">
-                Siap Memulai Proyek Anda?
+                {t("services.cta.title")}
               </h3>
               <p className="text-gray-400 text-lg mb-10 leading-relaxed">
-                Konsultasikan kebutuhan website atau aplikasi web Anda dengan tim
-                ahli kami. Dapatkan penawaran terbaik.
+                {t("services.cta.subtitle")}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button
                   size="lg"
                   className="bg-primary-green hover:bg-primary-green/90 text-white px-8 py-5 rounded-2xl shadow-lg shadow-primary-green/25 transition-all group text-base"
                 >
-                  Konsultasi Gratis Sekarang
+                  {t("services.cta.primary")}
                   <ArrowRight
                     className="ml-2 group-hover:translate-x-1 transition-transform"
                     size={18}
@@ -314,7 +300,7 @@ const Services = () => {
                   size="lg"
                   className="border-gray-700 text-gray-300 hover:bg-white/5 hover:border-gray-600 px-8 py-5 rounded-2xl transition-all text-base"
                 >
-                  Lihat Harga Paket
+                  {t("services.cta.secondary")}
                 </Button>
               </div>
             </div>
