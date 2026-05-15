@@ -1,6 +1,19 @@
-import { Mail, Phone, MapPin, Facebook, Instagram, Linkedin, Twitter, ArrowRight } from "lucide-react"
+import { Mail, Phone, MapPin, Instagram } from "lucide-react"
 import { Link } from "react-router-dom"
 import { useTranslation } from "../hooks/useTranslation"
+
+const TikTokIcon = ({ size = 16 }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    aria-hidden="true"
+  >
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5.8 20.1a6.34 6.34 0 0 0 10.86-4.43V8.6a8.16 8.16 0 0 0 4.77 1.52V6.69h-1.84Z" />
+  </svg>
+)
 
 const Footer = () => {
   const { t } = useTranslation()
@@ -11,10 +24,16 @@ const Footer = () => {
   const legal = t("footer.legal")
 
   const socialLinks = [
-    { icon: Facebook, href: "#", name: "Facebook" },
-    { icon: Instagram, href: "#", name: "Instagram" },
-    { icon: Linkedin, href: "#", name: "LinkedIn" },
-    { icon: Twitter, href: "#", name: "Twitter" }
+    {
+      icon: Instagram,
+      href: "https://www.instagram.com/luminara.codex/",
+      name: "Instagram"
+    },
+    {
+      icon: TikTokIcon,
+      href: "https://www.tiktok.com/@luminara.codex",
+      name: "TikTok"
+    }
   ]
 
   return (
@@ -30,7 +49,7 @@ const Footer = () => {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12 lg:gap-8">
           {/* Company Info */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-2 mb-6">
@@ -47,7 +66,7 @@ const Footer = () => {
               {t("footer.description")}
             </p>
 
-            <div className="space-y-3">
+            <div className="space-y-3 mb-6">
               <a
                 href="https://wa.me/6285111371404"
                 target="_blank"
@@ -67,6 +86,27 @@ const Footer = () => {
               <div className="flex items-center gap-3 text-gray-400 text-sm group">
                 <MapPin size={14} className="text-primary-green flex-shrink-0" />
                 <span className="group-hover:text-white transition-colors">Jakarta, Indonesia</span>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-gray-500 text-xs mb-3 uppercase tracking-wider">{t("footer.followUs")}</p>
+              <div className="flex gap-2">
+                {socialLinks.map((social, index) => {
+                  const Icon = social.icon
+                  return (
+                    <a
+                      key={index}
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-primary-green hover:border-primary-green transition-all"
+                      aria-label={social.name}
+                    >
+                      <Icon size={16} />
+                    </a>
+                  )
+                })}
               </div>
             </div>
           </div>
@@ -103,45 +143,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Newsletter */}
-          <div>
-            <h4 className="text-sm font-heading font-semibold uppercase tracking-wider text-gray-300 mb-6">
-              {t("footer.newsletterTitle")}
-            </h4>
-            <p className="text-gray-400 text-sm mb-4 leading-relaxed">
-              {t("footer.newsletterDesc")}
-            </p>
-
-            <div className="flex mb-6">
-              <input
-                type="email"
-                placeholder={t("footer.emailPlaceholder")}
-                className="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 rounded-l-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary-blue/50 focus:bg-white/10 transition-all"
-              />
-              <button className="bg-primary-green hover:bg-primary-green/90 px-4 rounded-r-xl transition-colors flex items-center justify-center">
-                <ArrowRight size={16} />
-              </button>
-            </div>
-
-            <div>
-              <p className="text-gray-500 text-xs mb-3 uppercase tracking-wider">{t("footer.followUs")}</p>
-              <div className="flex gap-2">
-                {socialLinks.map((social, index) => {
-                  const Icon = social.icon
-                  return (
-                    <a
-                      key={index}
-                      href={social.href}
-                      className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-primary-green hover:border-primary-green transition-all"
-                      aria-label={social.name}
-                    >
-                      <Icon size={16} />
-                    </a>
-                  )
-                })}
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
