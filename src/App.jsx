@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import BlogPage from './pages/BlogPage'
 import BlogDetailPage from './pages/BlogDetailPage'
+import ServiceDetailPage from './pages/ServiceDetailPage'
 import AuthPage from './pages/AuthPage'
 import DashboardPage from './pages/DashboardPage'
 import AddPostPage from './pages/AddPostPage'
@@ -30,6 +31,13 @@ function App() {
             <>
               <Header />
               <BlogDetailPage />
+              <Footer />
+            </>
+          } />
+          <Route path="/services/:slug" element={
+            <>
+              <Header />
+              <ServiceDetailPage />
               <Footer />
             </>
           } />

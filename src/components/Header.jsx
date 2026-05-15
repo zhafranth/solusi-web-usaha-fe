@@ -44,7 +44,6 @@ const Header = () => {
   const navItems = [
     { label: t("header.nav.home"), type: "link", to: "/" },
     { label: t("header.nav.services"), type: "scroll", target: "services" },
-    { label: t("header.nav.pricelist"), type: "scroll", target: "pricelist" },
     { label: t("header.nav.about"), type: "scroll", target: "about" },
     { label: t("header.nav.contact"), type: "scroll", target: "contact" },
   ]

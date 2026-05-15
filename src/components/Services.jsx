@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import {
   Smartphone,
@@ -16,32 +17,36 @@ import { useTranslation } from "../hooks/useTranslation";
 const serviceStyles = [
   {
     icon: Smartphone,
+    slug: "application-dev",
     gradient: "from-violet-500 to-purple-400",
     accent: "bg-violet-500/10 text-violet-600",
   },
   {
     icon: Globe,
+    slug: "web-development",
     gradient: "from-blue-500 to-cyan-400",
     accent: "bg-blue-500/10 text-blue-600",
   },
   {
     icon: Database,
+    slug: "data-solutions",
     gradient: "from-primary-green to-emerald-400",
     accent: "bg-emerald-500/10 text-emerald-600",
   },
   {
     icon: Mail,
+    slug: "digital-invites",
     gradient: "from-pink-500 to-rose-400",
     accent: "bg-pink-500/10 text-pink-600",
   },
 ];
 
-const ServiceCard = ({ service }) => {
+const ServiceCard = ({ service, learnMoreLabel }) => {
   const Icon = service.icon;
 
   return (
-    <div className="group relative h-full">
-      <div className="relative h-full bg-white rounded-3xl border border-gray-100 p-8 overflow-hidden transition-all duration-500 hover:border-gray-200/50 hover:-translate-y-1">
+    <Link to={`/services/${service.slug}`} className="group relative h-full block">
+      <div className="relative h-full bg-white rounded-3xl border border-gray-100 p-8 overflow-hidden transition-all duration-500 hover:border-gray-200/50 hover:-translate-y-1 hover:shadow-card-hover">
         {/* Gradient glow on hover */}
         <div
           className={`absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-0 group-hover:opacity-[0.03] transition-opacity duration-500 rounded-3xl`}
@@ -69,7 +74,7 @@ const ServiceCard = ({ service }) => {
           </p>
 
           {/* Feature pills */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 mb-6">
             {service.features.map((feature, i) => (
               <span
                 key={i}
@@ -79,6 +84,12 @@ const ServiceCard = ({ service }) => {
               </span>
             ))}
           </div>
+
+          {/* Learn more affordance */}
+          <div className="flex items-center gap-1.5 text-sm font-medium text-gray-400 group-hover:text-primary-blue transition-colors">
+            {learnMoreLabel}
+            <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+          </div>
         </div>
 
         {/* Bottom gradient line */}
@@ -86,7 +97,7 @@ const ServiceCard = ({ service }) => {
           className={`absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r ${service.gradient} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left`}
         />
       </div>
-    </div>
+    </Link>
   );
 };
 
@@ -232,7 +243,7 @@ const Services = () => {
                 className="px-3 shrink-0"
                 style={{ width: `${cardWidthPercent}%` }}
               >
-                <ServiceCard service={service} />
+                <ServiceCard service={service} learnMoreLabel={t("services.learnMore")} />
               </div>
             ))}
           </motion.div>
