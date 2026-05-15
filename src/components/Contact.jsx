@@ -38,7 +38,8 @@ const contactSchema = yup.object().shape({
 const defaultValues = { name: "", email: "", subject: "", message: "" }
 
 const contactIcons = [Phone, Mail, MapPin, Clock]
-const contactContents = ["+62 812-3456-7890", "info@luminaracodex.com", "Jakarta, Indonesia", "09:00 - 18:00 WIB"]
+const contactContents = ["+62 851-1137-1404", "info@luminaracodex.id", "Jakarta, Indonesia", "09:00 - 18:00 WIB"]
+const contactLinks = ["https://wa.me/6285111371404", "mailto:info@luminaracodex.id", null, null]
 
 const Contact = () => {
   const { t } = useTranslation()
@@ -76,6 +77,7 @@ const Contact = () => {
     title: info.title,
     content: contactContents[i],
     description: info.description,
+    href: contactLinks[i],
   }))
 
   const baseInputClasses = "w-full px-4 py-3.5 bg-gray-50 border rounded-xl focus:ring-2 focus:ring-primary-blue/20 focus:border-primary-blue focus:bg-white font-body text-sm transition-all outline-none"
@@ -119,9 +121,18 @@ const Contact = () => {
           >
             {contactInfo.map((info, index) => {
               const Icon = info.icon
+              const isExternal = info.href?.startsWith("http")
+              const Wrapper = info.href ? motion.a : motion.div
+              const wrapperProps = info.href
+                ? {
+                    href: info.href,
+                    ...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {}),
+                  }
+                : {}
               return (
-                <motion.div
+                <Wrapper
                   key={index}
+                  {...wrapperProps}
                   initial={{ opacity: 0, y: 15 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -140,7 +151,7 @@ const Contact = () => {
                     </p>
                     <p className="text-xs text-gray-400">{info.description}</p>
                   </div>
-                </motion.div>
+                </Wrapper>
               )
             })}
 

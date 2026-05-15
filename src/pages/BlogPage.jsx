@@ -12,6 +12,8 @@ import { motion } from "framer-motion";
 import { useBlogs } from "../services/blogService";
 import { useCategories } from "../services/categoryService";
 
+const WA_CONSULT_URL = `https://wa.me/6285111371404?text=${encodeURIComponent("Halo, saya tertarik untuk konsultasi gratis tentang layanan Anda.")}`;
+
 const BlogPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(
@@ -367,7 +369,7 @@ const BlogPage = () => {
             <p className="text-gray-400 text-lg mb-8">
               Tim ahli kami siap membantu mewujudkan website impian untuk bisnis Anda.
             </p>
-            <Link to="/#contact">
+            <a href={WA_CONSULT_URL} target="_blank" rel="noopener noreferrer">
               <Button
                 size="lg"
                 className="bg-primary-green hover:bg-primary-green/90 text-white px-8 py-5 rounded-2xl shadow-lg shadow-primary-green/25 group text-base"
@@ -375,7 +377,7 @@ const BlogPage = () => {
                 Konsultasi Gratis Sekarang
                 <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={18} />
               </Button>
-            </Link>
+            </a>
           </div>
         </motion.div>
       </div>

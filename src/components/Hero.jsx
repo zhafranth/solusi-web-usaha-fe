@@ -4,6 +4,8 @@ import { motion } from "framer-motion"
 import PixelBlast from "./PixelBlast"
 import { useTranslation } from "../hooks/useTranslation"
 
+const WA_CONSULT_URL = `https://wa.me/6285111371404?text=${encodeURIComponent("Halo, saya tertarik untuk konsultasi gratis tentang layanan Anda.")}`
+
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
   visible: (i) => ({
@@ -134,20 +136,15 @@ const Hero = () => {
 
               {/* CTA */}
               <motion.div custom={4} initial="hidden" animate="visible" variants={fadeUp} className="flex flex-col sm:flex-row gap-4 pt-2">
-                <Button
-                  size="lg"
-                  className="bg-primary-green hover:bg-primary-green/90 text-white text-base px-8 py-5 rounded-2xl shadow-lg shadow-primary-green/25 hover:shadow-xl hover:shadow-primary-green/30 transition-all group"
-                >
-                  {t("hero.ctaPrimary")}
-                  <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={18} />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:border-white/50 hover:text-white text-base px-8 py-5 rounded-2xl backdrop-blur-sm transition-all"
-                >
-                  {t("hero.ctaSecondary")}
-                </Button>
+                <a href={WA_CONSULT_URL} target="_blank" rel="noopener noreferrer">
+                  <Button
+                    size="lg"
+                    className="bg-primary-green hover:bg-primary-green/90 text-white text-base px-8 py-5 rounded-2xl shadow-lg shadow-primary-green/25 hover:shadow-xl hover:shadow-primary-green/30 transition-all group"
+                  >
+                    {t("hero.ctaPrimary")}
+                    <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={18} />
+                  </Button>
+                </a>
               </motion.div>
             </div>
 

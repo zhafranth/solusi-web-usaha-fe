@@ -9,6 +9,8 @@ import { useAuth } from "../hooks/useAuth"
 import { useLogout } from "../services/authService"
 import { useTranslation } from "../hooks/useTranslation"
 
+const WA_CONSULT_URL = `https://wa.me/6285111371404?text=${encodeURIComponent("Halo, saya tertarik untuk konsultasi gratis tentang layanan Anda.")}`
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
@@ -125,14 +127,15 @@ const Header = () => {
                   </Button>
                 </>
               ) : (
-                <Button
-                  onClick={() => scrollToSection('contact')}
-                  size="sm"
-                  className="bg-primary-blue hover:bg-primary-blue/90 text-white rounded-xl shadow-md shadow-primary-blue/25 hover:shadow-lg hover:shadow-primary-blue/30 transition-all"
-                >
-                  {t("header.cta")}
-                  <ArrowRight size={14} className="ml-1.5" />
-                </Button>
+                <a href={WA_CONSULT_URL} target="_blank" rel="noopener noreferrer">
+                  <Button
+                    size="sm"
+                    className="bg-primary-blue hover:bg-primary-blue/90 text-white rounded-xl shadow-md shadow-primary-blue/25 hover:shadow-lg hover:shadow-primary-blue/30 transition-all"
+                  >
+                    {t("header.cta")}
+                    <ArrowRight size={14} className="ml-1.5" />
+                  </Button>
+                </a>
               )}
             </div>
 
@@ -207,13 +210,18 @@ const Header = () => {
                       </Button>
                     </div>
                   ) : (
-                    <Button
-                      onClick={() => { scrollToSection('contact'); setIsMenuOpen(false); }}
-                      className="w-full bg-primary-blue text-white rounded-xl"
+                    <a
+                      href={WA_CONSULT_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="block"
                     >
-                      {t("header.cta")}
-                      <ArrowRight size={14} className="ml-1.5" />
-                    </Button>
+                      <Button className="w-full bg-primary-blue text-white rounded-xl">
+                        {t("header.cta")}
+                        <ArrowRight size={14} className="ml-1.5" />
+                      </Button>
+                    </a>
                   )}
                 </div>
               </div>

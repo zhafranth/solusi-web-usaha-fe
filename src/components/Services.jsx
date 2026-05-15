@@ -14,6 +14,8 @@ import {
 import { motion } from "framer-motion";
 import { useTranslation } from "../hooks/useTranslation";
 
+const WA_CONSULT_URL = `https://wa.me/6285111371404?text=${encodeURIComponent("Halo, saya tertarik untuk konsultasi gratis tentang layanan Anda.")}`;
+
 const serviceStyles = [
   {
     icon: Smartphone,
@@ -296,16 +298,18 @@ const Services = () => {
                 {t("services.cta.subtitle")}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button
-                  size="lg"
-                  className="bg-primary-green hover:bg-primary-green/90 text-white px-8 py-5 rounded-2xl shadow-lg shadow-primary-green/25 transition-all group text-base"
-                >
-                  {t("services.cta.primary")}
-                  <ArrowRight
-                    className="ml-2 group-hover:translate-x-1 transition-transform"
-                    size={18}
-                  />
-                </Button>
+                <a href={WA_CONSULT_URL} target="_blank" rel="noopener noreferrer">
+                  <Button
+                    size="lg"
+                    className="bg-primary-green hover:bg-primary-green/90 text-white px-8 py-5 rounded-2xl shadow-lg shadow-primary-green/25 transition-all group text-base"
+                  >
+                    {t("services.cta.primary")}
+                    <ArrowRight
+                      className="ml-2 group-hover:translate-x-1 transition-transform"
+                      size={18}
+                    />
+                  </Button>
+                </a>
                 <Button
                   variant="outline"
                   size="lg"

@@ -18,7 +18,7 @@ import {
 import { Button } from "../components/ui/button";
 import { useTranslation } from "../hooks/useTranslation";
 
-const WA_NUMBER = "6281234567890";
+const WA_NUMBER = "6285111371404";
 const WA_URL = `https://wa.me/${WA_NUMBER}`;
 
 const SERVICE_SLUGS = [

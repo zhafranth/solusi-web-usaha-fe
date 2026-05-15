@@ -48,14 +48,22 @@ const Footer = () => {
             </p>
 
             <div className="space-y-3">
-              <div className="flex items-center gap-3 text-gray-400 text-sm group">
+              <a
+                href="https://wa.me/6285111371404"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 text-gray-400 text-sm group"
+              >
                 <Phone size={14} className="text-primary-green flex-shrink-0" />
-                <span className="group-hover:text-white transition-colors">+62 812-3456-7890</span>
-              </div>
-              <div className="flex items-center gap-3 text-gray-400 text-sm group">
+                <span className="group-hover:text-white transition-colors">+62 851-1137-1404</span>
+              </a>
+              <a
+                href="mailto:info@luminaracodex.id"
+                className="flex items-center gap-3 text-gray-400 text-sm group"
+              >
                 <Mail size={14} className="text-primary-green flex-shrink-0" />
-                <span className="group-hover:text-white transition-colors">info@luminaracodex.com</span>
-              </div>
+                <span className="group-hover:text-white transition-colors">info@luminaracodex.id</span>
+              </a>
               <div className="flex items-center gap-3 text-gray-400 text-sm group">
                 <MapPin size={14} className="text-primary-green flex-shrink-0" />
                 <span className="group-hover:text-white transition-colors">Jakarta, Indonesia</span>
