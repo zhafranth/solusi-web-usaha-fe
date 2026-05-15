@@ -1,11 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import {
-  Smartphone,
-  Globe,
-  Database,
-  Mail,
   ArrowRight,
   ArrowUpRight,
   ChevronLeft,
@@ -13,35 +9,9 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "../hooks/useTranslation";
+import { SERVICE_SLUGS, SERVICE_STYLES } from "../lib/serviceStyles";
 
 const WA_CONSULT_URL = `https://wa.me/6285111371404?text=${encodeURIComponent("Halo, saya tertarik untuk konsultasi gratis tentang layanan Anda.")}`;
-
-const serviceStyles = [
-  {
-    icon: Smartphone,
-    slug: "application-dev",
-    gradient: "from-violet-500 to-purple-400",
-    accent: "bg-violet-500/10 text-violet-600",
-  },
-  {
-    icon: Globe,
-    slug: "web-development",
-    gradient: "from-blue-500 to-cyan-400",
-    accent: "bg-blue-500/10 text-blue-600",
-  },
-  {
-    icon: Database,
-    slug: "data-solutions",
-    gradient: "from-primary-green to-emerald-400",
-    accent: "bg-emerald-500/10 text-emerald-600",
-  },
-  {
-    icon: Mail,
-    slug: "digital-invites",
-    gradient: "from-pink-500 to-rose-400",
-    accent: "bg-pink-500/10 text-pink-600",
-  },
-];
 
 const ServiceCard = ({ service, learnMoreLabel }) => {
   const Icon = service.icon;
@@ -107,8 +77,16 @@ const AUTOPLAY_INTERVAL = 4000;
 
 const Services = () => {
   const { t } = useTranslation();
-  const items = t("services.items");
-  const services = items.map((item, i) => ({ ...serviceStyles[i], ...item }));
+  const services = useMemo(() => {
+    const items = t("services.items");
+    return items.map((item, i) => ({
+      ...item,
+      slug: SERVICE_SLUGS[i],
+      icon: SERVICE_STYLES[i].icon,
+      gradient: SERVICE_STYLES[i].gradient,
+      accent: SERVICE_STYLES[i].accent,
+    }));
+  }, [t]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [visibleCount, setVisibleCount] = useState(3);
   const [isPaused, setIsPaused] = useState(false);
@@ -160,6 +138,10 @@ const Services = () => {
 
   const cardWidthPercent = 100 / visibleCount;
   const translatePercent = currentIndex * cardWidthPercent;
+  const progressDots = useMemo(
+    () => Array.from({ length: maxIndex + 1 }, (_, i) => i),
+    [maxIndex]
+  );
 
   return (
     <section id="services" className="py-24 bg-gray-50/50 relative overflow-hidden">
@@ -253,7 +235,7 @@ const Services = () => {
 
         {/* Progress dots */}
         <div className="flex justify-center gap-2 mb-20">
-          {Array.from({ length: maxIndex + 1 }).map((_, i) => (
+          {progressDots.map((i) => (
             <button
               key={i}
               type="button"

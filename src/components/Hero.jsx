@@ -1,8 +1,10 @@
+import { lazy, Suspense } from "react"
 import { Button } from "./ui/button"
 import { ArrowRight, CheckCircle, Sparkles } from "lucide-react"
 import { motion } from "framer-motion"
-import PixelBlast from "./PixelBlast"
 import { useTranslation } from "../hooks/useTranslation"
+
+const PixelBlast = lazy(() => import("./PixelBlast"))
 
 const WA_CONSULT_URL = `https://wa.me/6285111371404?text=${encodeURIComponent("Halo, saya tertarik untuk konsultasi gratis tentang layanan Anda.")}`
 
@@ -31,20 +33,22 @@ const Hero = () => {
       {/* Background */}
       <div className="absolute inset-0 bg-hero-gradient" />
 
-      {/* PixelBlast WebGL background */}
+      {/* PixelBlast WebGL background (lazy — three.js + postprocessing) */}
       <div className="absolute inset-0">
-        <PixelBlast
-          variant="square"
-          patternScale={2.75}
-          color="#2b66e9"
-          pixelSize={6}
-          pixelSizeJitter={0.4}
-          enableRipples
-          rippleSpeed={0.4}
-          rippleThickness={0.12}
-          edgeFade={0.25}
-          transparent
-        />
+        <Suspense fallback={null}>
+          <PixelBlast
+            variant="square"
+            patternScale={2.75}
+            color="#2b66e9"
+            pixelSize={6}
+            pixelSizeJitter={0.4}
+            enableRipples
+            rippleSpeed={0.4}
+            rippleThickness={0.12}
+            edgeFade={0.25}
+            transparent
+          />
+        </Suspense>
       </div>
 
       {/* Decorative elements */}
