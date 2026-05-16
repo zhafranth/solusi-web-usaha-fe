@@ -91,6 +91,11 @@ const Services = () => {
   const [visibleCount, setVisibleCount] = useState(3);
   const [isPaused, setIsPaused] = useState(false);
   const intervalRef = useRef(null);
+  const carouselRef = useRef(null);
+
+  const scrollToServices = () => {
+    carouselRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   useEffect(() => {
     const updateVisibleCount = () => {
@@ -152,11 +157,12 @@ const Services = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
         <motion.div
+          ref={carouselRef}
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-16 scroll-mt-24"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-blue/5 border border-primary-blue/10 text-primary-blue text-sm font-medium mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-primary-blue animate-pulse" />
@@ -295,6 +301,7 @@ const Services = () => {
                 <Button
                   variant="outline"
                   size="lg"
+                  onClick={scrollToServices}
                   className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:border-white/50 px-8 py-5 rounded-2xl transition-all text-base"
                 >
                   {t("services.cta.secondary")}
