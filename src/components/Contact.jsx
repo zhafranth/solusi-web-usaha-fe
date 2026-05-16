@@ -5,8 +5,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
-import { submitContact } from "../services/contactService"
 import { useTranslation } from "../hooks/useTranslation"
+
+const CONTACT_EMAIL = "info@luminaracodex.id"
 
 const contactSchema = yup.object().shape({
   name: yup
@@ -47,7 +48,6 @@ const Contact = () => {
     register,
     handleSubmit,
     reset,
-    setError,
     clearErrors,
     formState: { errors, isSubmitting, isSubmitSuccessful },
   } = useForm({
@@ -62,14 +62,14 @@ const Contact = () => {
     return () => clearTimeout(timer)
   }, [isSubmitSuccessful, reset])
 
-  const onSubmit = async (data) => {
+  const onSubmit = (data) => {
     clearErrors("root")
-    try {
-      await submitContact(data)
-      reset(defaultValues, { keepIsSubmitted: true })
-    } catch (error) {
-      setError("root", { type: "server", message: error.message || t("contact.defaultError") })
-    }
+    const subject = encodeURIComponent(data.subject)
+    const body = encodeURIComponent(
+      `Nama: ${data.name}\nEmail: ${data.email}\n\n${data.message}`
+    )
+    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`
+    reset(defaultValues, { keepIsSubmitted: true })
   }
 
   const contactInfo = t("contact.info").map((info, i) => ({

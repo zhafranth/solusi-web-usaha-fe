@@ -572,8 +572,7 @@ export const translations = {
       quickLinks: [
         { name: "Beranda", href: "/" },
         { name: "Layanan", href: "/#services" },
-        { name: "Tentang Kami", href: "/#about" },
-        { name: "Blog", href: "/blog" },
+        { name: "Tentang", href: "/#about" },
         { name: "Kontak", href: "/#contact" },
       ],
       newsletterTitle: "Newsletter",
@@ -1160,8 +1159,7 @@ export const translations = {
       quickLinks: [
         { name: "Home", href: "/" },
         { name: "Services", href: "/#services" },
-        { name: "About Us", href: "/#about" },
-        { name: "Blog", href: "/blog" },
+        { name: "About", href: "/#about" },
         { name: "Contact", href: "/#contact" },
       ],
       newsletterTitle: "Newsletter",

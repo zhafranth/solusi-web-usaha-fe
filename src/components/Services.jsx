@@ -295,7 +295,7 @@ const Services = () => {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="border-gray-700 text-gray-300 hover:bg-white/5 hover:border-gray-600 px-8 py-5 rounded-2xl transition-all text-base"
+                  className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:border-white/50 px-8 py-5 rounded-2xl transition-all text-base"
                 >
                   {t("services.cta.secondary")}
                 </Button>

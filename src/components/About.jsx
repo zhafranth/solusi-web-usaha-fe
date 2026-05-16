@@ -4,6 +4,8 @@ import { motion, useInView } from "framer-motion"
 import { useRef, useState, useEffect } from "react"
 import { useTranslation } from "../hooks/useTranslation"
 
+const WA_CONSULT_URL = `https://wa.me/6285111371404?text=${encodeURIComponent("Halo, saya tertarik untuk konsultasi gratis tentang layanan Anda.")}`
+
 const AnimatedCounter = ({ target, suffix = "" }) => {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true })
@@ -113,13 +115,15 @@ const About = () => {
               </div>
             </div>
 
-            <Button
-              size="lg"
-              className="bg-primary-blue hover:bg-primary-blue/90 text-white px-8 py-5 rounded-2xl shadow-md shadow-primary-blue/20 group transition-all"
-            >
-              {t("about.cta")}
-              <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={18} />
-            </Button>
+            <a href={WA_CONSULT_URL} target="_blank" rel="noopener noreferrer" className="inline-block">
+              <Button
+                size="lg"
+                className="bg-primary-blue hover:bg-primary-blue/90 text-white px-8 py-5 rounded-2xl shadow-md shadow-primary-blue/20 group transition-all"
+              >
+                {t("about.cta")}
+                <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={18} />
+              </Button>
+            </a>
           </motion.div>
 
           {/* Right Content */}
