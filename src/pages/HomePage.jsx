@@ -9,6 +9,7 @@ import AnimatedSection from '../components/AnimatedSection'
 const HomePage = () => {
   return (
     <div className="min-h-screen bg-white">
+      <h2>Hellow</h2>
       <Header />
       <main>
         <section id="home">
