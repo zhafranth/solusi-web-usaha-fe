@@ -532,7 +532,7 @@ export const translations = {
       subtitle:
         "Siap untuk memulai proyek digital Anda? Tim ahli kami siap membantu mewujudkan visi bisnis Anda.",
       info: [
-        { title: "Telepon", description: "Senin - Jumat, 09:00 - 18:00" },
+        { title: "WhatsApp", description: "Senin - Jumat, 09:00 - 18:00" },
         { title: "Email", description: "Respon dalam 24 jam" },
         { title: "Alamat", description: "Konsultasi online tersedia" },
         { title: "Jam Operasional", description: "Senin - Jumat" },
@@ -1119,7 +1119,7 @@ export const translations = {
       subtitle:
         "Ready to start your digital project? Our expert team is ready to help bring your business vision to life.",
       info: [
-        { title: "Phone", description: "Mon - Fri, 09:00 - 18:00" },
+        { title: "WhatsApp", description: "Mon - Fri, 09:00 - 18:00" },
         { title: "Email", description: "Reply within 24 hours" },
         { title: "Address", description: "Online consultation available" },
         { title: "Office Hours", description: "Mon - Fri" },

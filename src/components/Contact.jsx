@@ -1,5 +1,5 @@
 import { Button } from "./ui/button"
-import { Mail, Phone, MapPin, Clock, Send, ArrowRight, Loader2, CheckCircle2 } from "lucide-react"
+import { Mail, MessageCircle, MapPin, Clock, Send, ArrowRight, Loader2, CheckCircle2 } from "lucide-react"
 import { useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useForm } from "react-hook-form"
@@ -38,7 +38,7 @@ const contactSchema = yup.object().shape({
 
 const defaultValues = { name: "", email: "", subject: "", message: "" }
 
-const contactIcons = [Phone, Mail, MapPin, Clock]
+const contactIcons = [MessageCircle, Mail, MapPin, Clock]
 const contactContents = ["+62 851-1137-1404", "info@luminaracodex.id", "Jakarta, Indonesia", "09:00 - 18:00 WIB"]
 const contactLinks = ["https://wa.me/6285111371404", "mailto:info@luminaracodex.id", null, null]
 
