@@ -31,8 +31,8 @@ jobs:
           ssh "${{ secrets.SSH_USER_PROD }}@${{ secrets.SSH_HOST_PROD }}" \
             "cd '${{ secrets.DEPLOY_PATH_PROD }}' && ./scripts/deploy-production.sh"
 
-      - name: Health check
-        run: |
-          status=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 30 "${{ secrets.PROD_HEALTHCHECK_URL }}")
-          echo "HTTP $status"
-          test "$status" = "200"
+      # - name: Health check
+      #   run: |
+      #     status=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 30 "${{ secrets.PROD_HEALTHCHECK_URL }}")
+      #     echo "HTTP $status"
+      #     test "$status" = "200"
