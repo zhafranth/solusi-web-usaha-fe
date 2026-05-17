@@ -1,0 +1,38 @@
+name: Deploy to Production VPS
+
+on:
+  push:
+    branches:
+      - release-production
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy to Production VPS
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY_PROD }}
+
+      - name: Add VPS to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          ssh-keyscan -H "${{ secrets.SSH_HOST_PROD }}" >> ~/.ssh/known_hosts
+
+      - name: Run deploy script on VPS
+        run: |
+          ssh "${{ secrets.SSH_USER_PROD }}@${{ secrets.SSH_HOST_PROD }}" \
+            "cd '${{ secrets.DEPLOY_PATH_PROD }}' && ./scripts/deploy-production.sh"
+
+      - name: Health check
+        run: |
+          status=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 30 "${{ secrets.PROD_HEALTHCHECK_URL }}")
+          echo "HTTP $status"
+          test "$status" = "200"
